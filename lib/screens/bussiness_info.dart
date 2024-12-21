@@ -179,6 +179,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mnm_vendor/models/categories_model.dart';
+import 'package:mnm_vendor/screens/dashboard_fragments/verification_page.dart';
 import 'package:mnm_vendor/screens/upload_id_page.dart';
 import 'package:mnm_vendor/utils/add_store.dart';
 import 'package:mnm_vendor/utils/providers/categories_state_provider.dart';
@@ -424,7 +425,7 @@ class _BussinessInfoState extends ConsumerState<BussinessInfo> {
                               context: context,
                               message: 'store successfully added');
                           Navigator.pushReplacementNamed(
-                              context, IDVerificationScreen.routeName);
+                              context, KycVerificationScreen.routeName);
                         } catch (e) {
                           showCustomSnackbar(
                               context: context, message: e.toString());

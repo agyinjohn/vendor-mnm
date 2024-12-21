@@ -48,7 +48,7 @@ Route<dynamic> onGenerateRoute(RouteSettings setting, WidgetRef ref) {
       return PageTransition(
           child: IDVerificationScreen(
             onComplete: () {
-              ref.read(stepStateProvider.notifier).completeStep(1);
+              ref.read(stepStateProvider.notifier).completeStep(0);
             },
           ),
           type: PageTransitionType.rightToLeft,
@@ -62,7 +62,7 @@ Route<dynamic> onGenerateRoute(RouteSettings setting, WidgetRef ref) {
       return PageTransition(
           child: FaceDetectionPage(
             onComplete: () {
-              ref.read(stepStateProvider.notifier).completeStep(2);
+              ref.read(stepStateProvider.notifier).completeStep(1);
             },
           ),
           duration: const Duration(milliseconds: 500),
@@ -71,7 +71,7 @@ Route<dynamic> onGenerateRoute(RouteSettings setting, WidgetRef ref) {
       return PageTransition(
           child: BussinessInfo(
             onComplete: () {
-              ref.read(stepStateProvider.notifier).completeStep(0);
+              ref.read(stepStateProvider.notifier).completeStep(2);
             },
           ),
           duration: const Duration(milliseconds: 500),

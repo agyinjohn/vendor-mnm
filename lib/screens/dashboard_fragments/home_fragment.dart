@@ -99,6 +99,9 @@ class _HomeFragmentState extends ConsumerState<HomeFragment> {
                   height: size.height * 0.25,
                   child: recentOrders.when(
                       data: (data) {
+                        if (data.isEmpty) {
+                          return const Text('You have no recent orders');
+                        }
                         print("Order for recent${data[0]['createdAt']}");
                         return ListView.builder(
                             shrinkWrap: true,

@@ -48,19 +48,20 @@ class RecentOrdersNotifier extends StateNotifier<AsyncValue<List<dynamic>>> {
       final SharedPreferences sharedPreferences =
           await SharedPreferences.getInstance();
       final String? token = sharedPreferences.getString('token');
-      const String url = '${AppColors.url}/vendor/recent/order';
+      const String url = '${AppColors.url}/vendor/recent/orders';
       // Replace with your token
       final headers = {'Authorization': 'Bearer $token'};
 
       final response = await http
           .get(Uri.parse(url), headers: headers)
           .timeout(const Duration(seconds: 30));
-
+      print(jsonDecode(response.body));
+      print(response.statusCode);
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         state = AsyncValue.data(data);
       } else {
-        throw Exception('Failed to load orders');
+        throw Exception(jsonDecode(response.body)['message']);
       }
     } catch (error) {
       print(error);

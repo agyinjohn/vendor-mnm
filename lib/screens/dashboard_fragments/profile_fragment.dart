@@ -1,20 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mnm_vendor/screens/dashboard_fragments/verification_page.dart';
 
 import 'package:iconly/iconly.dart';
+import 'package:nuts_activity_indicator/nuts_activity_indicator.dart';
 import '../../app_colors.dart';
+import '../../utils/providers/verification_provider_state.dart';
+import '../../utils/store_notifier.dart';
 
-class ProfileFragment extends StatefulWidget {
+class ProfileFragment extends ConsumerStatefulWidget {
   const ProfileFragment({super.key});
 
   @override
-  State<ProfileFragment> createState() => _ProfileFragmentState();
+  ConsumerState<ProfileFragment> createState() => _ProfileFragmentState();
 }
 
-class _ProfileFragmentState extends State<ProfileFragment> {
+class _ProfileFragmentState extends ConsumerState<ProfileFragment> {
+  @override
+  void initState() {
+    super.initState();
+    // Trigger the fetch function on widget load
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(vendorVerificationProvider.notifier).fetchVerificationStatus();
+    });
+  }
+
   final bool isAccountSetupComplete = true;
   @override
   Widget build(BuildContext context) {
+    final verificationState = ref.watch(vendorVerificationProvider);
+    final stores = ref.watch(storeProvider);
+    final store = stores[0];
+    print(verificationState.verified);
     final size = MediaQuery.of(context).size;
     return Scaffold(
       body: Stack(
@@ -66,22 +83,22 @@ class _ProfileFragmentState extends State<ProfileFragment> {
                               ),
                             ),
                             SizedBox(width: size.width * 0.03),
-                            const Column(
+                            Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'ABC STORE',
-                                  style: TextStyle(
+                                  store.storeName,
+                                  style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 13),
                                 ),
                                 Text(
-                                  '+1234 567 890',
-                                  style: TextStyle(fontSize: 11),
+                                  store.storePhone,
+                                  style: const TextStyle(fontSize: 11),
                                 ),
                                 Text(
-                                  'vendor@abcstore.com',
-                                  style: TextStyle(fontSize: 11),
+                                  store.type.name,
+                                  style: const TextStyle(fontSize: 11),
                                 ),
                               ],
                             ),
@@ -123,14 +140,29 @@ class _ProfileFragmentState extends State<ProfileFragment> {
                         color: Colors.green,
                         borderRadius: BorderRadius.circular(3),
                       ),
-                      width: size.width * 0.14,
-                      height: size.height * 0.06,
-                      child: const Center(
-                        child: Text(
-                          'Verified',
-                          style: TextStyle(color: Colors.white, fontSize: 11),
-                        ),
+                      width: size.width * 0.15,
+                      height: size.height * 0.04,
+                      child: Center(
+                        child: verificationState.isLoading
+                            ? const NutsActivityIndicator()
+                            : verificationState.error != null
+                                ? const Text(
+                                    "Error",
+                                    style: TextStyle(color: Colors.red),
+                                  )
+                                : Text(
+                                    "${verificationState.verified ?? false}",
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
                       ),
+                      // const
+
+                      // Center(
+                      //   child: Text(
+                      //     'Verified',
+                      //     style: TextStyle(color: Colors.white, fontSize: 11),
+                      //   ),
+                      // ),
                     )
                   ],
                 ),

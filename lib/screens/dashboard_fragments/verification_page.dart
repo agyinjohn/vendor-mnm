@@ -55,18 +55,20 @@ class _KycVerificationScreenState extends ConsumerState<KycVerificationScreen> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 30),
-                    _buildStepItem(0, 'Enter your business info.',
-                        'assets/images/image 37.png', BussinessInfo.routeName),
+
                     _buildStepItem(
-                        1,
+                        0,
                         'Take a picture of your Ghana Card.',
                         'assets/images/image 35.png',
                         IDVerificationScreen.routeName),
                     _buildStepItem(
-                        2,
+                        1,
                         'Take a picture of your face.',
                         'assets/images/image 37.png',
                         FaceDetectionPage.routeName),
+                    _buildStepItem(2, 'Enter your business info.',
+                        'assets/images/image 37.png', BussinessInfo.routeName),
+
                     const SizedBox(height: 30),
                     if (completedSteps[0] &&
                         completedSteps[1] &&
@@ -77,32 +79,32 @@ class _KycVerificationScreenState extends ConsumerState<KycVerificationScreen> {
                                 context, DashboardPage.routeName, (r) => false);
                           },
                           title: 'Finish'),
-                    if (!completedSteps[0] &&
-                        !completedSteps[1] &&
-                        !completedSteps[2])
-                      Center(
-                        child: GestureDetector(
-                          onTap: () {
-                            // Navigate to the "Why is this needed?" info page
+                    // if (!completedSteps[0] &&
+                    //     !completedSteps[1] &&
+                    //     !completedSteps[2])
+                    //   Center(
+                    //     child: GestureDetector(
+                    //       onTap: () {
+                    //         // Navigate to the "Why is this needed?" info page
 
-                            Navigator.pushAndRemoveUntil(
-                                context,
-                                PageTransition(
-                                  duration: const Duration(milliseconds: 1000),
-                                  child: const DashboardPage(),
-                                  type: PageTransitionType.rightToLeft,
-                                ),
-                                (route) => false);
-                          },
-                          child: const Text(
-                            'Skip for now',
-                            style: TextStyle(
-                                color: Colors.orange,
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ),
+                    //         Navigator.pushAndRemoveUntil(
+                    //             context,
+                    //             PageTransition(
+                    //               duration: const Duration(milliseconds: 1000),
+                    //               child: const DashboardPage(),
+                    //               type: PageTransitionType.rightToLeft,
+                    //             ),
+                    //             (route) => false);
+                    //       },
+                    //       child: const Text(
+                    //         'Skip for now',
+                    //         style: TextStyle(
+                    //             color: Colors.orange,
+                    //             fontSize: 14,
+                    //             fontWeight: FontWeight.bold),
+                    //       ),
+                    //     ),
+                    //   ),
                   ],
                 ),
               ),
