@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mnm_vendor/screens/dashboard_fragments/products_thread/upload_food_screen.dart';
 import 'package:mnm_vendor/screens/sign_up_screen.dart';
 import 'package:nuts_activity_indicator/nuts_activity_indicator.dart';
 import '../app_colors.dart';
 import '../utils/providers/login_auth_provider.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/custom_textfield.dart';
+import 'dashboard_fragments/products_thread/upload_drug_page.dart';
 
 class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key});
@@ -158,13 +160,18 @@ class _SignInPageState extends ConsumerState<SignInScreen> {
                       ),
                       const SizedBox(height: 16),
                       CustomButton(
-                          onTap: () async {
-                            final isloginSuccess = await authNotifier.login(
-                                _controllerID.text.trim(),
-                                _controllerPassword.text.trim(),
-                                context,
-                                ref);
-                          },
+                          onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const UploadDrugScreen())),
+                          // onTap: () async {
+                          //   final isloginSuccess = await authNotifier.login(
+                          //       _controllerID.text.trim(),
+                          //       _controllerPassword.text.trim(),
+                          //       context,
+                          //       ref);
+                          // },
                           title: 'Login'),
                       const SizedBox(height: 24),
                       const Text(

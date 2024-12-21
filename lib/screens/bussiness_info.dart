@@ -396,6 +396,7 @@ class _BussinessInfoState extends ConsumerState<BussinessInfo> {
                         zoom: 10.0,
                       ),
                       markers: _markers,
+
                       onLongPress:
                           _onLongPress, // Allow user to pin location on long press
                       myLocationEnabled: true, // Enable 'My Location' button

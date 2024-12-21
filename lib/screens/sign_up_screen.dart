@@ -132,7 +132,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.secondaryColor,
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
           SafeArea(
@@ -263,7 +263,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ),
                         const SizedBox(height: 16),
                         CustomButton(
-                          onTap: _signup, // Call the signup function
+                          onTap: _signup,
                           title: 'Sign Up',
                         ),
                         const SizedBox(height: 16),

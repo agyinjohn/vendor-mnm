@@ -3,7 +3,7 @@ import 'package:iconly/iconly.dart';
 import 'package:mnm_vendor/models/store_item.dart';
 
 import '../../../app_colors.dart';
-import '../../upload_food_screen.dart';
+import 'upload_food_screen.dart';
 // import '../../upload_product_screen.dart';
 
 class ProductDetailPage extends StatefulWidget {
@@ -62,7 +62,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const UploadProductScreen()));
+                            builder: (context) => const UploadFoodScreen()));
                   },
                   child: Row(
                     children: [
