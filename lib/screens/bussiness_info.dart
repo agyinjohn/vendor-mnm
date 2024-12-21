@@ -213,6 +213,7 @@ class _BussinessInfoState extends ConsumerState<BussinessInfo> {
 
   // Controllers for the form fields
   final TextEditingController _businessNameController = TextEditingController();
+  final TextEditingController _storeAddressController = TextEditingController();
   final TextEditingController _businessTypeController = TextEditingController();
   final TextEditingController _storePhoneController = TextEditingController();
   CategoryModel? _selectedCategory;
@@ -314,6 +315,16 @@ class _BussinessInfoState extends ConsumerState<BussinessInfo> {
               ),
             ),
             const SizedBox(height: 16),
+            TextField(
+              controller: _storeAddressController,
+              decoration: const InputDecoration(
+                filled: true,
+                hintText: 'Address: e.g. Makola',
+                prefixIcon: Icon(Icons.location_pin),
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
             // Business type dropdown
             categoriesAsyncValue.when(
                 data: (types) => DropdownButtonFormField<CategoryModel>(
@@ -402,6 +413,7 @@ class _BussinessInfoState extends ConsumerState<BussinessInfo> {
 
                       if (_selectedLocation != null &&
                           _businessNameController.text.isNotEmpty &&
+                          _storeAddressController.text.isNotEmpty &&
                           _selectedCategory != null &&
                           _storePhoneController.text.isNotEmpty) {
                         print('triggered');
@@ -412,10 +424,12 @@ class _BussinessInfoState extends ConsumerState<BussinessInfo> {
                           print(isLoading);
                           await StoreService.addStore(
                               token: token!,
-                              storeAddress: '',
+                              storeAddress: _storeAddressController.text,
                               storeName: _businessNameController.text,
                               latitude: _selectedLocation!.latitude,
+                              // 6.756197672214557,
                               longitude: _selectedLocation!.longitude,
+                              // -1.6797468136824893,
                               storePhone: _storePhoneController.text,
                               type: _selectedCategory!.id,
                               ref: ref);

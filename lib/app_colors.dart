@@ -18,9 +18,9 @@ class AppColors {
   // Colors for onPrimary and onSecondary surfaces
   // static const Color onPrimaryColor = Color(0xFFFFFFFF);
   // White  static const Color onSecondaryColor = Color(0xFF000000); // Black
-  static const String baseUrl = 'http://192.168.211.58:8000/api';
-  static const String baseURL = 'http://192.168.211.58:8000/vendor';
-  static const String url = 'http://192.168.211.58:8000';
+  static const String baseUrl = 'http://172.21.224.1:8000/api';
+  static const String baseURL = 'http://172.21.224.1:8000/vendor';
+  static const String url = 'http://172.21.224.1:8000';
   // static const Color cardColor = Color(0xFFB9B9B9);
   static const Color cardColor = Color.fromARGB(255, 217, 216, 216);
   static const Color errorColor = Color(0xFFB00020);
