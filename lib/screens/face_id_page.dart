@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
+import 'package:mnm_vendor/screens/bussiness_info.dart';
 import 'package:mnm_vendor/screens/dashboard_fragments/verification_page.dart';
 import 'package:mnm_vendor/utils/user_verification.dart';
 import 'package:mnm_vendor/widgets/custom_button.dart';
@@ -311,7 +312,7 @@ class FaceDetectionPageState extends ConsumerState<FaceDetectionPage> {
                                     .then((_) {
                                   widget.onComplete();
                                   Navigator.pushReplacementNamed(
-                                      context, KycVerificationScreen.routeName);
+                                      context, BussinessInfo.routeName);
                                 });
                               },
                               title: 'Save and continue'),

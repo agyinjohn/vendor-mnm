@@ -134,7 +134,7 @@ class _UploadProductScreenState extends ConsumerState<UploadProductScreen> {
       if (!hasPriceCategory) {
         priceList = [
           {
-            'name': 'normal',
+            'name': 'single',
             'price': priceCategoryController.text,
           }
         ];
@@ -253,8 +253,8 @@ class _UploadProductScreenState extends ConsumerState<UploadProductScreen> {
             TextButton(
               child: const Text("Cancel"),
               onPressed: () {
-                Navigator.of(context)
-                    .pop(); // Close the dialog without deleting
+                Navigator.of(context).pop();
+                // Close the dialog without deleting
               },
             ),
             TextButton(
@@ -340,7 +340,7 @@ class _UploadProductScreenState extends ConsumerState<UploadProductScreen> {
                             builder: (context, snapshot) {
                               if (snapshot.connectionState ==
                                   ConnectionState.waiting) {
-                                return const CircularProgressIndicator(); // Show loader while loading
+                                return const NutsActivityIndicator(); // Show loader while loading
                               } else if (snapshot.hasError ||
                                   snapshot.data == null) {
                                 return const Icon(Icons

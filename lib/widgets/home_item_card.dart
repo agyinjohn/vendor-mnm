@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mnm_vendor/app_colors.dart';
 
 class HomeItemCard extends StatelessWidget {
-  final String imageUrl, title, value;
+  final String imageUrl, title;
+  final Widget value;
   const HomeItemCard(
       {super.key,
       required this.imageUrl,
@@ -32,11 +33,12 @@ class HomeItemCard extends StatelessWidget {
                 style: TextStyle(color: Colors.grey[900]),
               ),
               const SizedBox(height: 6),
-              Text(
-                value,
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-              ),
+              // Text(
+              //   value,
+              //   style:
+              //       const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              // ),
+              value,
             ],
           ),
         ),

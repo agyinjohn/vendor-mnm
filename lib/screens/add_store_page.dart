@@ -296,7 +296,11 @@ class AddStorePageState extends ConsumerState<AddStorePage> {
                           });
                           print(isLoading);
                           await StoreService.addStore(
+                              contxt: context,
+                              startTime: '',
+                              endTime: '',
                               token: token!,
+                              images: [{}],
                               storeName: _businessNameController.text,
                               latitude: _selectedLocation!.latitude,
                               longitude: _selectedLocation!.longitude,

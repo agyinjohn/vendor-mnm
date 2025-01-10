@@ -1,20 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mnm_vendor/payment/payment_methods.dart';
 import 'package:mnm_vendor/screens/dashboard_fragments/verification_page.dart';
 
 import 'package:iconly/iconly.dart';
+import 'package:nuts_activity_indicator/nuts_activity_indicator.dart';
 import '../../app_colors.dart';
+import '../../utils/providers/verification_provider_state.dart';
+import '../../utils/store_notifier.dart';
 
-class ProfileFragment extends StatefulWidget {
+class ProfileFragment extends ConsumerStatefulWidget {
   const ProfileFragment({super.key});
 
   @override
-  State<ProfileFragment> createState() => _ProfileFragmentState();
+  ConsumerState<ProfileFragment> createState() => _ProfileFragmentState();
 }
 
-class _ProfileFragmentState extends State<ProfileFragment> {
+class _ProfileFragmentState extends ConsumerState<ProfileFragment> {
+  @override
+  void initState() {
+    super.initState();
+    // Trigger the fetch function on widget load
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(vendorVerificationProvider.notifier).fetchVerificationStatus();
+    });
+  }
+
   final bool isAccountSetupComplete = true;
   @override
   Widget build(BuildContext context) {
+    final verificationState = ref.watch(vendorVerificationProvider);
+    final stores = ref.watch(storeProvider);
+    final store = stores[0];
+    print(verificationState.verified);
     final size = MediaQuery.of(context).size;
     return Scaffold(
       body: Stack(
@@ -66,22 +84,22 @@ class _ProfileFragmentState extends State<ProfileFragment> {
                               ),
                             ),
                             SizedBox(width: size.width * 0.03),
-                            const Column(
+                            Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'ABC STORE',
-                                  style: TextStyle(
+                                  store.storeName,
+                                  style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 13),
                                 ),
                                 Text(
-                                  '+1234 567 890',
-                                  style: TextStyle(fontSize: 11),
+                                  store.storePhone,
+                                  style: const TextStyle(fontSize: 11),
                                 ),
                                 Text(
-                                  'vendor@abcstore.com',
-                                  style: TextStyle(fontSize: 11),
+                                  store.type.name,
+                                  style: const TextStyle(fontSize: 11),
                                 ),
                               ],
                             ),
@@ -123,25 +141,43 @@ class _ProfileFragmentState extends State<ProfileFragment> {
                         color: Colors.green,
                         borderRadius: BorderRadius.circular(3),
                       ),
-                      width: size.width * 0.14,
-                      height: size.height * 0.06,
-                      child: const Center(
-                        child: Text(
-                          'Verified',
-                          style: TextStyle(color: Colors.white, fontSize: 11),
-                        ),
+                      width: size.width * 0.15,
+                      height: size.height * 0.04,
+                      child: Center(
+                        child: verificationState.isLoading
+                            ? const NutsActivityIndicator()
+                            : verificationState.error != null
+                                ? const Text(
+                                    "Error",
+                                    style: TextStyle(color: Colors.red),
+                                  )
+                                : Text(
+                                    "${verificationState.verified ?? false}",
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
                       ),
+                      // const
+
+                      // Center(
+                      //   child: Text(
+                      //     'Verified',
+                      //     style: TextStyle(color: Colors.white, fontSize: 11),
+                      //   ),
+                      // ),
                     )
                   ],
                 ),
                 _buildInformation(
                     context,
                     'assets/images/identification-documents.png',
-                    'Edit account details'),
+                    'Edit account details',
+                    () {}),
                 _buildInformation(context, 'assets/images/card-payment.png',
-                    'Payment methods'),
-                _buildInformation(
-                    context, 'assets/images/waste.png', 'Remove account'),
+                    'Payment methods', () {
+                  Navigator.pushNamed(context, PaymentMethodsPage.routeName);
+                }),
+                _buildInformation(context, 'assets/images/waste.png',
+                    'Remove account', () {}),
 
                 SizedBox(height: size.height * 0.028),
                 const Divider(),
@@ -150,11 +186,11 @@ class _ProfileFragmentState extends State<ProfileFragment> {
                 SizedBox(height: size.height * 0.025),
 
                 _buildInformation(context, 'assets/images/online-support.png',
-                    'Make a report'),
-                _buildInformation(
-                    context, 'assets/images/protect.png', 'Privacy & Policy'),
-                _buildInformation(
-                    context, 'assets/images/protect.png', 'Terms & Conditions'),
+                    'Make a report', () {}),
+                _buildInformation(context, 'assets/images/protect.png',
+                    'Privacy & Policy', () {}),
+                _buildInformation(context, 'assets/images/protect.png',
+                    'Terms & Conditions', () {}),
 
                 SizedBox(height: size.height * 0.028),
                 const Divider(),
@@ -238,11 +274,11 @@ class _ProfileFragmentState extends State<ProfileFragment> {
     );
   }
 
-  Widget _buildInformation(
-      BuildContext ctx, String imageUrl, String description) {
+  Widget _buildInformation(BuildContext ctx, String imageUrl,
+      String description, Function()? onPressed) {
     final size = MediaQuery.of(context).size;
     return GestureDetector(
-      onTap: () {},
+      onTap: onPressed,
       child: Row(
         children: [
           SizedBox(

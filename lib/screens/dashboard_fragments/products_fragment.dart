@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mnm_vendor/screens/upload_product_screen.dart';
+import 'package:mnm_vendor/upload_pages/upload_beverage_screen.dart';
+import 'package:mnm_vendor/upload_pages/upload_drug_page.dart';
 import 'package:mnm_vendor/utils/fetch_stores.dart';
 import 'package:mnm_vendor/widgets/showsnackbar.dart';
 import 'package:nuts_activity_indicator/nuts_activity_indicator.dart';
@@ -21,54 +23,90 @@ class ProductsFragment extends ConsumerStatefulWidget {
 }
 
 class _ProductsFragmentState extends ConsumerState<ProductsFragment> {
-  bool isLoading = false;
+  bool isLoading = false; // Indicates the initial load
+  bool isUpdating = false; // Indicates background updates
+
   @override
   void initState() {
     super.initState();
-    getData();
+    getData(initialLoad: true); // Initial data load
   }
 
-  getData() async {
-    try {
+  getData({bool initialLoad = false}) async {
+    final SharedPreferences pref = await SharedPreferences.getInstance();
+    const maxRetries = 4;
+    int attempt = 0;
+
+    if (initialLoad) {
       setState(() {
         isLoading = true;
       });
-      final SharedPreferences pref = await SharedPreferences.getInstance();
-
-      final token = pref.getString('token');
-      final selectedStoreNotifier = ref.read(selectedStoreProvider.notifier);
-
-      // Assume `stores` is fetched from somewhere else
-      // final token = pref.getString('token');
-      final stores = await fetchStoresFromApi(token!, context);
-      await selectedStoreNotifier.loadSelectedStore(stores);
-      final selectedStore = ref.watch(selectedStoreProvider);
-      await ref
-          .read(storeItemsProvider.notifier)
-          .fetchStoreItems(selectedStore!.id);
-    } catch (e) {
-      showCustomSnackbar(
-          context: context,
-          message: 'Something went wrong',
-          action: SnackBarAction(label: 'Refresh', onPressed: () {}));
-    } finally {
+    } else {
       setState(() {
-        isLoading = false;
+        isUpdating = true; // Background update indicator
       });
+    }
+
+    while (attempt < maxRetries) {
+      try {
+        final token = pref.getString('token');
+        if (token == null) {
+          throw Exception('Token is missing');
+        }
+
+        final stores = await fetchStoresFromApi(token, context);
+        final selectedStoreNotifier = ref.read(selectedStoreProvider.notifier);
+        await selectedStoreNotifier.loadSelectedStore(stores);
+
+        final selectedStore = ref.watch(selectedStoreProvider);
+        if (selectedStore == null) {
+          throw Exception('No selected store found');
+        }
+
+        await ref
+            .read(storeItemsProvider.notifier)
+            .fetchStoreItems(selectedStore.id);
+
+        // Exit the loop if successful
+        break;
+      } catch (e) {
+        attempt++;
+        if (attempt >= maxRetries) {
+          showCustomSnackbar(
+            context: context,
+            message: 'Failed to load data',
+            action: SnackBarAction(
+                label: 'Refresh',
+                onPressed: () async {
+                  await getData(initialLoad: false);
+                }),
+            duration: const Duration(seconds: 10),
+          );
+        }
+      } finally {
+        if (initialLoad) {
+          setState(() {
+            isLoading = false;
+          });
+        } else {
+          setState(() {
+            isUpdating = false;
+          });
+        }
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final storeItems = ref.watch(storeItemsProvider);
-    print(storeItems);
     final size = MediaQuery.of(context).size;
+
     return Scaffold(
-      body: isLoading
-          ? const Center(
-              child: NutsActivityIndicator(),
-            )
-          : storeItems.isEmpty
+      body: Stack(
+        children: [
+          // Main content
+          storeItems.isEmpty && !isLoading
               ? const Center(
                   child:
                       Text('No Products available in selected store category'),
@@ -76,16 +114,15 @@ class _ProductsFragmentState extends ConsumerState<ProductsFragment> {
               : GridView.builder(
                   padding: const EdgeInsets.all(12),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: size.width < 600
-                        ? 2
-                        : 4, // Adjusts columns based on screen size
+                    crossAxisCount: size.width < 600 ? 2 : 4,
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
-                    childAspectRatio: 0.70, // Adjust height-to-width ratio
+                    childAspectRatio: 0.70,
                   ),
                   itemCount: storeItems.length,
                   itemBuilder: (context, index) {
                     final item = storeItems[index];
+
                     return GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -98,19 +135,47 @@ class _ProductsFragmentState extends ConsumerState<ProductsFragment> {
                       child: FoodItem(
                         imageUrl: "${AppColors.url}${item.images[0].url}",
                         description: item.description,
-                        price: '...',
+                        price: item.itemSizes.length < 2
+                            ? item.itemSizes.map((i) => i.price).join('')
+                            : '...',
                         rating: '4.5',
                         quantity: item.quantity,
                       ),
                     );
                   },
                 ),
+
+          // Loading indicator for initial load
+          if (isLoading)
+            const Center(
+              child: NutsActivityIndicator(),
+            ),
+
+          // Small indicator for background updates
+          if (isUpdating)
+            const Positioned(
+              bottom: 16,
+              right: 16,
+              child: CircleAvatar(
+                radius: 24,
+                backgroundColor: Colors.orange,
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation(Colors.white),
+                  strokeWidth: 2,
+                ),
+              ),
+            ),
+        ],
+      ),
       floatingActionButton: GestureDetector(
         onTap: () {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => const UploadProductScreen()));
+                builder: (context) =>
+                    //  const UploadProductScreen()
+                    const UploadDrugScreen(),
+              ));
         },
         child: Container(
           decoration: BoxDecoration(

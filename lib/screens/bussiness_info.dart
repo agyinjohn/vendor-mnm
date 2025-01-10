@@ -175,10 +175,16 @@
 //   }
 // }
 
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:mnm_vendor/app_colors.dart';
 import 'package:mnm_vendor/models/categories_model.dart';
+import 'package:mnm_vendor/screens/dashboard_fragments/verification_page.dart';
 import 'package:mnm_vendor/screens/upload_id_page.dart';
 import 'package:mnm_vendor/utils/add_store.dart';
 import 'package:mnm_vendor/utils/providers/categories_state_provider.dart';
@@ -280,6 +286,59 @@ class _BussinessInfoState extends ConsumerState<BussinessInfo> {
   }
 
   bool isLoading = false;
+  File? _selectedImage;
+  String? _base64Image;
+  String? filename;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickImage(ImageSource source) async {
+    final pickedFile = await _picker.pickImage(source: source);
+
+    if (pickedFile != null) {
+      setState(() {
+        filename = pickedFile.name;
+        print(filename);
+        _selectedImage = File(pickedFile.path);
+        print(_selectedImage);
+        _base64Image = base64Encode(_selectedImage!.readAsBytesSync());
+        print('Base64 Encoded Image: $_base64Image'); // Log for testing
+      });
+    }
+  }
+
+  void _clearImage() {
+    setState(() {
+      _selectedImage = null;
+      _base64Image = null;
+    });
+  }
+
+  TimeOfDay? _openingTime;
+  TimeOfDay? _closingTime;
+
+  void _selectTime(BuildContext context, bool isOpeningTime) async {
+    final TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+
+    if (pickedTime != null) {
+      setState(() {
+        if (isOpeningTime) {
+          _openingTime = pickedTime;
+        } else {
+          _closingTime = pickedTime;
+        }
+      });
+    }
+  }
+
+  String _formatTimeOfDay(TimeOfDay? time) {
+    if (time == null) return "Not set";
+    final hours = time.hour.toString().padLeft(2, '0');
+    final minutes = time.minute.toString().padLeft(2, '0');
+    return "$hours:$minutes";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -376,11 +435,168 @@ class _BussinessInfoState extends ConsumerState<BussinessInfo> {
             // Business location
             const SizedBox(height: 16),
             const Text(
+              'Select Shop Opening and Closing Times',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Opening Time:',
+                    style: TextStyle(
+                      fontSize: 16,
+                    )),
+                Text(_formatTimeOfDay(_openingTime),
+                    style: const TextStyle(fontSize: 16)),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryColor,
+                      shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(5)))),
+                  onPressed: () => _selectTime(context, true),
+                  child: const Text(
+                    'Set Opening Time',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Closing Time:', style: TextStyle(fontSize: 16)),
+                Text(_formatTimeOfDay(_closingTime),
+                    style: const TextStyle(
+                      fontSize: 16,
+                    )),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryColor,
+                      shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(5)))),
+                  onPressed: () => _selectTime(context, false),
+                  child: const Text(
+                    'Set Closing Time',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+
+            // ElevatedButton(
+            //   onPressed: () {
+            //     if (_openingTime != null && _closingTime != null) {
+            //       final opening = _formatTimeOfDay(_openingTime);
+            //       final closing = _formatTimeOfDay(_closingTime);
+            //       ScaffoldMessenger.of(context).showSnackBar(
+            //         SnackBar(
+            //           content: Text(
+            //               'Shop Hours: Opening at $opening, Closing at $closing'),
+            //         ),
+            //       );
+            //     } else {
+            //       ScaffoldMessenger.of(context).showSnackBar(
+            //         const SnackBar(
+            //           content:
+            //               Text('Please select both opening and closing times.'),
+            //         ),
+            //       );
+            //     }
+            //   },
+            //   style: ElevatedButton.styleFrom(
+            //     minimumSize: const Size(double.infinity, 50),
+            //   ),
+            //   child: const Text('Confirm Times'),
+            // ),
+            const SizedBox(height: 16),
+            const Text(
+              'Business logo/Shop image',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 3),
+            GestureDetector(
+              onTap: () {
+                showModalBottomSheet(
+                  context: context,
+                  builder: (context) => Wrap(
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.photo),
+                        title: const Text('Pick from Gallery'),
+                        onTap: () {
+                          Navigator.pop(context);
+                          _pickImage(ImageSource.gallery);
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.camera),
+                        title: const Text('Take a Picture'),
+                        onTap: () {
+                          Navigator.pop(context);
+                          _pickImage(ImageSource.camera);
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
+              child: Container(
+                width: double.infinity,
+                height: 250,
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Colors.grey,
+                    style: BorderStyle.solid,
+                  ),
+                  borderRadius: BorderRadius.circular(8.0),
+                  color: Colors.grey[200],
+                ),
+                child: Stack(
+                  children: [
+                    if (_selectedImage == null)
+                      const Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Center(
+                              child: Icon(Icons.add_a_photo,
+                                  size: 50, color: Colors.grey)),
+                          SizedBox(height: 8),
+                          Text('Shop Logo or Shop Picture'),
+                        ],
+                      )
+                    else
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8.0),
+                        child: Image.file(
+                          _selectedImage!,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                        ),
+                      ),
+                    if (_selectedImage != null)
+                      Positioned(
+                        top: 3,
+                        right: 5,
+                        child: IconButton(
+                          color: Colors.red,
+                          icon: const Icon(Icons.clear, color: Colors.red),
+                          onPressed: _clearImage,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
               'Business location',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            const Text('Tap on the map to search for precise location'),
+            const Text('Long press on the map to select precise location'),
             const SizedBox(height: 8),
             // Map section
             SizedBox(
@@ -404,6 +620,7 @@ class _BussinessInfoState extends ConsumerState<BussinessInfo> {
             ),
             const SizedBox(height: 16),
             // Submit button
+
             SizedBox(
                 width: double.infinity,
                 child: CustomButton(
@@ -418,12 +635,26 @@ class _BussinessInfoState extends ConsumerState<BussinessInfo> {
                           _selectedCategory != null &&
                           _storePhoneController.text.isNotEmpty) {
                         print('triggered');
+                        print("${_openingTime!.hour}:${_openingTime!.minute}");
+                        print(_closingTime);
                         try {
                           setState(() {
                             isLoading = true;
                           });
+
                           print(isLoading);
                           await StoreService.addStore(
+                              contxt: context,
+                              images: [
+                                {
+                                  "data": "base64,$_base64Image",
+                                  "fileName": "$filename"
+                                }
+                              ],
+                              startTime:
+                                  '${_openingTime!.hour}:${_openingTime!.minute}',
+                              endTime:
+                                  '${_closingTime!.hour}:${_closingTime!.minute}',
                               token: token!,
                               storeAddress: _storeAddressController.text,
                               storeName: _businessNameController.text,
@@ -434,12 +665,12 @@ class _BussinessInfoState extends ConsumerState<BussinessInfo> {
                               storePhone: _storePhoneController.text,
                               type: _selectedCategory!.id,
                               ref: ref);
-                          widget.onComplete();
-                          showCustomSnackbar(
-                              context: context,
-                              message: 'store successfully added');
-                          Navigator.pushReplacementNamed(
-                              context, IDVerificationScreen.routeName);
+                          // widget.onComplete();
+                          // showCustomSnackbar(
+                          //     context: context,
+                          //     message: 'store successfully added');
+                          // Navigator.pushReplacementNamed(
+                          //     context, KycVerificationScreen.routeName);
                         } catch (e) {
                           showCustomSnackbar(
                               context: context, message: e.toString());
@@ -451,8 +682,7 @@ class _BussinessInfoState extends ConsumerState<BussinessInfo> {
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content:
-                                Text('Please select a location on the map'),
+                            content: Text('Please all feilds are required'),
                           ),
                         );
                       }

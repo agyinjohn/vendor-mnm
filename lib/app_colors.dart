@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+//dlwc2022@gmail.com
 class AppColors {
   static const Color primaryColor = Color(0xFFFF6633);
   static const Color secondaryColor = Color(0xFFF0F8FF);
@@ -18,9 +19,10 @@ class AppColors {
   // Colors for onPrimary and onSecondary surfaces
   // static const Color onPrimaryColor = Color(0xFFFFFFFF);
   // White  static const Color onSecondaryColor = Color(0xFF000000); // Black
-  static const String baseUrl = 'http://172.25.16.1:8000/api';
-  static const String baseURL = 'http://172.25.16.1:8000/vendor';
-  static const String url = 'http://172.25.16.1:8000';
+  static const String baseUrl = 'http://192.168.246.58:8000/api';
+  static const String baseURL = 'http://192.168.246.58:8000/vendor';
+  static const String url = 'http://192.168.246.58:8000';
+
   // static const Color cardColor = Color(0xFFB9B9B9);
   static const Color cardColor = Color.fromARGB(255, 217, 216, 216);
   static const Color errorColor = Color(0xFFB00020);

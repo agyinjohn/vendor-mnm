@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mnm_vendor/notification_page.dart';
+import 'package:mnm_vendor/payment/add_bank_payment.dart';
+import 'package:mnm_vendor/payment/add_mobile_payment.dart';
+import 'package:mnm_vendor/payment/payment_methods.dart';
 import 'package:mnm_vendor/screens/add_store_page.dart';
 import 'package:mnm_vendor/screens/bussiness_info.dart';
 import 'package:mnm_vendor/screens/customized_ui_image_picker.dart';
@@ -48,7 +51,7 @@ Route<dynamic> onGenerateRoute(RouteSettings setting, WidgetRef ref) {
       return PageTransition(
           child: IDVerificationScreen(
             onComplete: () {
-              ref.read(stepStateProvider.notifier).completeStep(1);
+              ref.read(stepStateProvider.notifier).completeStep(0);
             },
           ),
           type: PageTransitionType.rightToLeft,
@@ -62,7 +65,7 @@ Route<dynamic> onGenerateRoute(RouteSettings setting, WidgetRef ref) {
       return PageTransition(
           child: FaceDetectionPage(
             onComplete: () {
-              ref.read(stepStateProvider.notifier).completeStep(2);
+              ref.read(stepStateProvider.notifier).completeStep(1);
             },
           ),
           duration: const Duration(milliseconds: 500),
@@ -71,7 +74,7 @@ Route<dynamic> onGenerateRoute(RouteSettings setting, WidgetRef ref) {
       return PageTransition(
           child: BussinessInfo(
             onComplete: () {
-              ref.read(stepStateProvider.notifier).completeStep(0);
+              ref.read(stepStateProvider.notifier).completeStep(2);
             },
           ),
           duration: const Duration(milliseconds: 500),
@@ -89,6 +92,17 @@ Route<dynamic> onGenerateRoute(RouteSettings setting, WidgetRef ref) {
       return PageTransition(
           child: const NotificationsPage(),
           type: PageTransitionType.rightToLeft);
+    case PaymentMethodsPage.routeName:
+      return PageTransition(
+          child: const PaymentMethodsPage(),
+          type: PageTransitionType.rightToLeft);
+    case AddMomoAccountPage.routeName:
+      return PageTransition(
+          child: const AddMomoAccountPage(),
+          type: PageTransitionType.rightToLeft);
+    case AddbankCard.routeName:
+      return PageTransition(
+          child: const AddbankCard(), type: PageTransitionType.rightToLeft);
     default:
       return MaterialPageRoute(
           builder: (_) => const Center(

@@ -165,15 +165,10 @@ class _IDVerificationScreenState extends ConsumerState<IDVerificationScreen> {
                         onTap: () async {
                           await _saveImagePath(_frontImage!.path);
                           widget.onComplete();
-                          Navigator.push(
-                              context,
-                              PageTransition(
-                                  child: FaceDetectionPage(onComplete: () {
-                                    ref
-                                        .read(stepStateProvider.notifier)
-                                        .completeStep(1);
-                                  }),
-                                  type: PageTransitionType.rightToLeft));
+                          Navigator.pushNamed(
+                            context,
+                            FaceDetectionPage.routeName,
+                          );
                         },
                         title: 'Save and continue')
                     : const Center(

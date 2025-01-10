@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mnm_vendor/app_colors.dart';
+import 'package:mnm_vendor/widgets/showsnackbar.dart';
 
 // Define the provider for the API response
 final storeResponseProvider = StateProvider<String?>((ref) => null);
@@ -14,8 +16,12 @@ class StoreService {
     required String storeAddress,
     required double longitude,
     required String storePhone,
+    required String startTime,
+    required String endTime,
     required String type,
     required WidgetRef ref,
+    required List<Map<String, String>> images,
+    required BuildContext contxt,
   }) async {
     // API endpoint for adding the store
     const String apiUrl = '${AppColors.url}/vendor/add-store-info';
@@ -23,11 +29,14 @@ class StoreService {
     // Create the body for the POST request
     Map<String, dynamic> storeData = {
       'storeName': storeName,
+      'startTime': startTime,
+      'endTime': endTime,
       'latitude': latitude,
       'longitude': longitude,
       'storePhone': storePhone,
       'storeAddress': storeAddress,
       'type': type,
+      'images': images,
     };
 
     try {
@@ -45,22 +54,12 @@ class StoreService {
         // Success: Update the response provider
         ref.read(storeResponseProvider.notifier).state =
             'Store successfully added';
-      } else if (response.statusCode == 400) {
-        // Handle bad request
-        ref.read(storeResponseProvider.notifier).state = 'Not all fields given';
-      } else if (response.statusCode == 401) {
-        // Handle unauthorized (identity not verified)
-        ref.read(storeResponseProvider.notifier).state =
-            'Vendor identity not verified';
       } else {
-        // Handle unexpected error
-        ref.read(storeResponseProvider.notifier).state =
-            'Error adding store info';
+        throw Exception(jsonDecode(response.body)['message']);
       }
     } catch (error) {
       // Handle network or server error
-      ref.read(storeResponseProvider.notifier).state = 'Network error';
-      print('Error: $error');
+      showCustomSnackbar(context: contxt, message: '$error');
     }
   }
 }

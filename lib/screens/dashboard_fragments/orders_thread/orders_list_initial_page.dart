@@ -93,7 +93,16 @@ class _OrderListInitialPageState extends ConsumerState<OrderListInitialPage> {
                   child: ordersState.when(
                       data: (data) {
                         if (data.isEmpty) {
-                          return const Center(child: Text("No orders found"));
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                'assets/images/total-orders.gif',
+                                width: 150,
+                              ),
+                              const Center(child: Text("No orders found")),
+                            ],
+                          );
                         }
                         final allFilteredOrdersEmpty = data.keys.every((date) {
                           final orders = data[date] as List;
@@ -147,9 +156,11 @@ class _OrderListInitialPageState extends ConsumerState<OrderListInitialPage> {
                           },
                         );
                       },
-                      error: (error, stackTrace) => Center(
-                            child: Text('An error occured$error'),
-                          ),
+                      error: (error, stackTrace) {
+                        return Center(
+                          child: Text('An error occured$error'),
+                        );
+                      },
                       loading: () => const NutsActivityIndicator()),
                 ),
                 // Expanded(

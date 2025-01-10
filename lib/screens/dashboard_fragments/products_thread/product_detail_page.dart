@@ -220,8 +220,13 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   style: TextStyle(fontSize: 12, color: Colors.grey),
                 ),
                 SizedBox(height: size.height * 0.008),
-                ...widget.item.itemSizes.map((e) =>
-                    _buildPriceCard(context, e.name, e.price.toString())),
+                ...widget.item.itemSizes
+                    .map((e) => widget.item.itemSizes.length < 2
+                        ? Text(
+                            'GHS ${e.price.toString()}',
+                            style: const TextStyle(fontSize: 12),
+                          )
+                        : _buildPriceCard(context, e.name, e.price.toString())),
                 SizedBox(height: size.height * 0.024),
 
                 if (widget.item.attributes.containsKey('Add-ons')) ...[
