@@ -9,6 +9,9 @@ import '../utils/providers/login_auth_provider.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/custom_textfield.dart';
 import 'dashboard_fragments/products_thread/upload_beverage_screen.dart';
+import 'dashboard_fragments/products_thread/upload_drug_page.dart';
+import 'dashboard_fragments/products_thread/upload_food_screen.dart';
+import 'dashboard_fragments/products_thread/upload_gift_screen.dart';
 // import 'dashboard_fragments/products_thread/upload_drug_page.dart';
 
 class SignInScreen extends ConsumerStatefulWidget {
@@ -165,7 +168,7 @@ class _SignInPageState extends ConsumerState<SignInScreen> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
-                                      const UploadBeverageScreen())),
+                                      const UploadFoodScreen())),
                           // onTap: () async {
                           //   final isloginSuccess = await authNotifier.login(
                           //       _controllerID.text.trim(),
