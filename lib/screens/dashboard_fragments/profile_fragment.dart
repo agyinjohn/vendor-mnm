@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mnm_vendor/payment/payment_methods.dart';
 import 'package:mnm_vendor/screens/dashboard_fragments/verification_page.dart';
 
 import 'package:iconly/iconly.dart';
@@ -169,11 +170,14 @@ class _ProfileFragmentState extends ConsumerState<ProfileFragment> {
                 _buildInformation(
                     context,
                     'assets/images/identification-documents.png',
-                    'Edit account details'),
+                    'Edit account details',
+                    () {}),
                 _buildInformation(context, 'assets/images/card-payment.png',
-                    'Payment methods'),
-                _buildInformation(
-                    context, 'assets/images/waste.png', 'Remove account'),
+                    'Payment methods', () {
+                  Navigator.pushNamed(context, PaymentMethodsPage.routeName);
+                }),
+                _buildInformation(context, 'assets/images/waste.png',
+                    'Remove account', () {}),
 
                 SizedBox(height: size.height * 0.028),
                 const Divider(),
@@ -182,11 +186,11 @@ class _ProfileFragmentState extends ConsumerState<ProfileFragment> {
                 SizedBox(height: size.height * 0.025),
 
                 _buildInformation(context, 'assets/images/online-support.png',
-                    'Make a report'),
-                _buildInformation(
-                    context, 'assets/images/protect.png', 'Privacy & Policy'),
-                _buildInformation(
-                    context, 'assets/images/protect.png', 'Terms & Conditions'),
+                    'Make a report', () {}),
+                _buildInformation(context, 'assets/images/protect.png',
+                    'Privacy & Policy', () {}),
+                _buildInformation(context, 'assets/images/protect.png',
+                    'Terms & Conditions', () {}),
 
                 SizedBox(height: size.height * 0.028),
                 const Divider(),
@@ -270,11 +274,11 @@ class _ProfileFragmentState extends ConsumerState<ProfileFragment> {
     );
   }
 
-  Widget _buildInformation(
-      BuildContext ctx, String imageUrl, String description) {
+  Widget _buildInformation(BuildContext ctx, String imageUrl,
+      String description, Function()? onPressed) {
     final size = MediaQuery.of(context).size;
     return GestureDetector(
-      onTap: () {},
+      onTap: onPressed,
       child: Row(
         children: [
           SizedBox(

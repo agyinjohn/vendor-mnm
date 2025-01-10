@@ -168,11 +168,13 @@ class _KycVerificationScreenState extends ConsumerState<KycVerificationScreen> {
                       ? Icons.lock_outline // Show lock icon if disabled
                       : Icons.arrow_forward_ios,
                   color: Colors.grey),
-          onTap: isDisabled || completedSteps[index]
-              ? null
-              : () {
-                  Navigator.pushNamed(context, routeName);
-                },
+          onTap:
+              //  isDisabled || completedSteps[index]
+              //     ? null
+              //     :
+              () {
+            Navigator.pushNamed(context, routeName);
+          },
         ),
       ),
     );

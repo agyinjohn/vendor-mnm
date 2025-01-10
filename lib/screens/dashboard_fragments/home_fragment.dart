@@ -38,7 +38,7 @@ class _HomeFragmentState extends ConsumerState<HomeFragment> {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     final recentOrders = ref.watch(recentOrdersProvider);
-    print(recentOrders);
+    // print(recentOrders);
     return Padding(
       padding: const EdgeInsets.fromLTRB(20.0, 5, 20, 0),
       child: Column(
@@ -47,36 +47,60 @@ class _HomeFragmentState extends ConsumerState<HomeFragment> {
             child: Column(
               children: [
                 const SizedBox(height: 10),
-                const Row(
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     HomeItemCard(
                       imageUrl: 'assets/images/total-orders.gif',
-                      title: 'Total Order',
-                      value: '100',
+                      title: 'Completed Orders',
+                      value: recentOrders.when(
+                          data: (da) {
+                            final states = da.stats;
+                            return Text("${states.completedOrders}");
+                          },
+                          error: (error, trace) => const Text(''),
+                          loading: () => const NutsActivityIndicator()),
                     ),
-                    SizedBox(width: 6),
+                    const SizedBox(width: 6),
                     HomeItemCard(
                       imageUrl: 'assets/images/total-revenue.gif',
                       title: 'Total Revenue',
-                      value: 'GHC 10,000.00',
+                      value: recentOrders.when(
+                          data: (da) {
+                            final states = da.stats;
+                            return Text("GHC ${states.revenue}");
+                          },
+                          error: (error, trace) => const Text(''),
+                          loading: () => const NutsActivityIndicator()),
                     ),
                   ],
                 ),
                 const SizedBox(height: 10),
-                const Row(
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     HomeItemCard(
                       imageUrl: 'assets/images/pending-orders.gif',
                       title: 'Pending Orders',
-                      value: '50',
+                      value: recentOrders.when(
+                          data: (da) {
+                            final states = da.stats;
+                            return Text("${states.pendingOrders}");
+                          },
+                          error: (error, trace) => const Text(''),
+                          loading: () => const NutsActivityIndicator()),
                     ),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                     HomeItemCard(
                       imageUrl: 'assets/images/products.gif',
                       title: 'Products',
-                      value: '50',
+                      value: recentOrders.when(
+                          data: (da) {
+                            final states = da.stats;
+                            return Text("${states.productCount}");
+                          },
+                          error: (error, trace) => const Text(''),
+                          loading: () => const NutsActivityIndicator()),
                     ),
                   ],
                 ),
@@ -99,42 +123,49 @@ class _HomeFragmentState extends ConsumerState<HomeFragment> {
                   height: size.height * 0.25,
                   child: recentOrders.when(
                       data: (data) {
-                        if (data.isEmpty) {
+                        final recentOrders = data.recentOrders;
+                        if (recentOrders.isEmpty) {
                           return const Text('You have no recent orders');
                         }
-                        print("Order for recent${data[0]['createdAt']}");
+
+                        print(
+                            "Order for recent${recentOrders[0]['createdAt']}");
                         return ListView.builder(
                             shrinkWrap: true,
-                            itemCount: data.length,
+                            itemCount: recentOrders.length,
                             itemBuilder: (context, index) {
                               final List<String> itemNames =
-                                  (data[index]['items'] as List<dynamic>)
+                                  (recentOrders[index]['items']
+                                          as List<dynamic>)
                                       .map((item) => item['itemSizeId']
                                           ['itemId']['name'] as String)
                                       .toList();
-                              print(data[index]['vendorStatus']);
-                              if (data.isEmpty) {
+                              print(recentOrders[index]['vendorStatus']);
+                              if (recentOrders.isEmpty) {
                                 return const Center(
                                   child: Text('You have no recent orders'),
                                 );
                               }
                               return OrderItem(
-                                  orderNumber: data[index]['_id'],
-                                  name: data[index]['customerId']['name'],
+                                  orderNumber: recentOrders[index]['_id'],
+                                  name: recentOrders[index]['customerId']
+                                      ['name'],
                                   items: itemNames.join(','),
-                                  status: data[index]['vendorStatus'],
-                                  orderDetail: data[index]['items'],
-                                  statusColor:
-                                      data[index]['vendorStatus'] == 'PENDING'
-                                          ? Colors.yellow
-                                          : data[index]['vendorStatus'] ==
-                                                  'ACCEPTED'
-                                              ? Colors.orange
-                                              : data[index]['vendorStatus'] ==
-                                                      'REJECTED'
-                                                  ? Colors.red
-                                                  : Colors.green,
-                                  createdAt: data[index]['createdAt']);
+                                  status: recentOrders[index]['vendorStatus'],
+                                  orderDetail: recentOrders[index]['items'],
+                                  statusColor: recentOrders[index]
+                                              ['vendorStatus'] ==
+                                          'PENDING'
+                                      ? Colors.yellow
+                                      : recentOrders[index]['vendorStatus'] ==
+                                              'ACCEPTED'
+                                          ? Colors.orange
+                                          : recentOrders[index]
+                                                      ['vendorStatus'] ==
+                                                  'REJECTED'
+                                              ? Colors.red
+                                              : Colors.green,
+                                  createdAt: recentOrders[index]['createdAt']);
                             });
                       },
                       error: (onb, stacktrace) => const Center(
@@ -146,31 +177,6 @@ class _HomeFragmentState extends ConsumerState<HomeFragment> {
                             child: NutsActivityIndicator(),
                           )),
                 ),
-                // SizedBox(
-                //   height: size.width * 0.45,
-                //   child: const SingleChildScrollView(
-                //     child: Column(
-                //       children: [
-                //         OrderItem(
-                //             createdAt: 'last year',
-                //             items: '2x Burger, 1x Fries, 1x Chicken Bucket',
-                //             name: 'Mohammed Ali',
-                //             orderNumber: '01234',
-                //             status: 'Awaiting confirmation',
-                //             statusColor: Colors.yellow),
-                //         Divider(color: AppColors.cardColor, thickness: 3),
-                //         SizedBox(height: 6),
-                //         OrderItem(
-                //             createdAt: 'last year',
-                //             items: '1x Fries, 1x Coca Cola, 2x Coconut Bread',
-                //             name: 'Name',
-                //             orderNumber: '12345',
-                //             status: 'Awaiting confirmation',
-                //             statusColor: Colors.yellow),
-                //       ],
-                //     ),
-                //   ),
-                // ),
               ],
             ),
           ),

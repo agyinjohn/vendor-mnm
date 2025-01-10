@@ -25,8 +25,11 @@ Future<void> uploadFastFoodItems(
       showCustomSnackbar(
           context: context, message: 'Food uploaded successfully');
     } else {
+      print(response.body);
       showCustomSnackbar(
-          context: context, message: 'Failed to upload item, try again');
+          context: context,
+          message: jsonDecode(response.body)['message'],
+          duration: const Duration(seconds: 30));
     }
   } catch (e) {
     print(e.toString());
