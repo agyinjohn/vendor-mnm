@@ -244,15 +244,17 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               onSelected: (value) {
                 // Handle the selected option
                 if (value == 1) {
-                  Navigator.pushNamed(context, StoreSelectionPage.routeName);
+                  Navigator.pushNamed(context, StoreDetailsPage.routeName);
                 } else if (value == 2) {
                   Navigator.pushNamed(context, AddStorePage.routeName);
                 }
               },
               itemBuilder: (context) {
                 return [
-                  const PopupMenuItem(value: 1, child: Text('Switch store')),
-                  const PopupMenuItem(value: 2, child: Text('Add a store'))
+                  const PopupMenuItem(
+                      value: 1, child: Text('Store information')),
+                  const PopupMenuItem(
+                      value: 2, child: Text('Earnings Statitics'))
                 ];
               },
             )

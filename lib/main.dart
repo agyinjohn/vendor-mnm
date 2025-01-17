@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -29,11 +30,19 @@ class _MyAppState extends ConsumerState<MyApp> {
   bool isLoading = true;
   bool isVendor = false;
   bool hasToken = false; // Flag to track token presence
+  Timer? _tokenCheckTimer; // Timer for periodic token check
 
   @override
   void initState() {
     super.initState();
     checkUserRole();
+    startTokenExpirationListener(); // Start the token expiration listener
+  }
+
+  @override
+  void dispose() {
+    _tokenCheckTimer?.cancel(); // Cancel the timer when widget is disposed
+    super.dispose();
   }
 
   Future<void> checkUserRole() async {
@@ -54,6 +63,24 @@ class _MyAppState extends ConsumerState<MyApp> {
 
     setState(() {
       isLoading = false; // Set loading to false after validation
+    });
+  }
+
+  void startTokenExpirationListener() {
+    _tokenCheckTimer =
+        Timer.periodic(const Duration(seconds: 30), (timer) async {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
+      if (token == null || JwtDecoder.isExpired(token)) {
+        // If the token is expired or doesn't exist, log out the user
+        await prefs.remove('token'); // Clear token from storage
+        setState(() {
+          hasToken = false;
+          isVendor = false;
+        });
+        timer.cancel(); // Stop the timer after token expiration
+      }
     });
   }
 

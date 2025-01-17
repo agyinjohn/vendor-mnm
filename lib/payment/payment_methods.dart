@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iconly/iconly.dart';
 import 'package:mnm_vendor/models/payment_model.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 import '../app_colors.dart';
 import '../providers/account_provider.dart';
 import '../services/payment_services_api.dart';
@@ -53,26 +56,52 @@ class _PaymentMethodsPageState extends ConsumerState<PaymentMethodsPage> {
             children: [
               // SizedBox(height: size.height * 0.01),
               paymentMethodsAsyncValue.when(
-                data: (paymentMethods) {
-                  return SizedBox(
-                    height: 200,
-                    child: ListView.builder(
-                      scrollDirection:
-                          Axis.horizontal, // Enables horizontal scrolling
-                      itemCount: paymentMethods.length,
-                      itemBuilder: (context, index) {
-                        final paymentMethod = paymentMethods[index];
-                        return _buildAccountCard(context,
-                            paymentMethod.bankCode, ref, paymentMethod);
-                      },
-                    ),
-                  );
-                },
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, stackTrace) => const Center(
-                  child: Text("Failed to load payment methods"),
-                ),
-              ),
+                  data: (paymentMethods) {
+                    return SizedBox(
+                      height: 200,
+                      child: ListView.builder(
+                        scrollDirection:
+                            Axis.horizontal, // Enables horizontal scrolling
+                        itemCount: paymentMethods.length,
+                        itemBuilder: (context, index) {
+                          final paymentMethod = paymentMethods[index];
+                          return _buildAccountCard(context,
+                              paymentMethod.bankCode, ref, paymentMethod);
+                        },
+                      ),
+                    );
+                  },
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (error, stackTrace) {
+                    return ElevatedButton(
+                        onPressed: () async {
+                          const String baseUrl = AppColors.baseURL;
+
+                          final SharedPreferences prefs =
+                              await SharedPreferences.getInstance();
+                          final token = prefs.getString('token');
+                          final url = Uri.parse('$baseUrl/payment-methods');
+                          final response = await http.get(
+                            url,
+                            headers: {
+                              'Authorization': 'Bearer $token',
+                              'Content-Type': 'application/json',
+                            },
+                          );
+
+                          if (response.statusCode == 200) {
+                            final List<dynamic> data =
+                                jsonDecode(response.body);
+                            data
+                                .map((json) => PaymentMethod.fromJson(json))
+                                .toList();
+                          } else {
+                            throw Exception("Failed to load payment methods");
+                          }
+                        },
+                        child: const Text('Reload'));
+                  }),
               if (accounts.isNotEmpty)
                 Text('Your Accounts', style: theme.titleMedium),
               SizedBox(height: size.height * 0.01),

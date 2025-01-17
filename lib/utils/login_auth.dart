@@ -97,6 +97,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
             role: user['role']);
         // ref.read(userProvider.notifier).saveUser(userData);
         print(userData.email);
+        if (!context.mounted) return false;
         // Update state to indicate login success
         state = state.copyWith(isLoading: false, loggedIn: true);
 

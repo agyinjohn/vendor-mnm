@@ -31,9 +31,9 @@ Route<dynamic> onGenerateRoute(RouteSettings setting, WidgetRef ref) {
         type: PageTransitionType.rightToLeft,
         duration: const Duration(milliseconds: 1000),
       );
-    case StoreSelectionPage.routeName:
+    case StoreDetailsPage.routeName:
       return PageTransition(
-          child: const StoreSelectionPage(),
+          child: const StoreDetailsPage(),
           type: PageTransitionType.rightToLeft,
           duration: const Duration(milliseconds: 1000));
     case SignInScreen.routeName:

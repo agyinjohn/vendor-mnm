@@ -68,7 +68,8 @@ class _HomeFragmentState extends ConsumerState<HomeFragment> {
                       value: recentOrders.when(
                           data: (da) {
                             final states = da.stats;
-                            return Text("GHC ${states.revenue}");
+                            return Text(
+                                "GHC ${states.revenue.toStringAsFixed(2)}");
                           },
                           error: (error, trace) => const Text(''),
                           loading: () => const NutsActivityIndicator()),
