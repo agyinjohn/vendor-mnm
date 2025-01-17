@@ -10,6 +10,7 @@ import 'package:mnm_vendor/screens/sign_in_screen.dart';
 import 'package:nuts_activity_indicator/nuts_activity_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'screens/dashboard_fragments/products_thread/upload_food_screen.dart';
 import 'screens/dashboard_page.dart';
 import 'utils/providers/user_provider.dart';
 

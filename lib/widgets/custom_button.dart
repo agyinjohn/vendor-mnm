@@ -9,7 +9,7 @@ class CustomButton extends StatelessWidget {
   const CustomButton({
     super.key,
     required this.onTap,
-    this.height = 45,
+    this.height = 55,
     required this.title,
   });
 
