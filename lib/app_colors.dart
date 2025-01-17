@@ -22,6 +22,7 @@ class AppColors {
   static const String baseUrl = 'http://192.168.246.58:8000/api';
   static const String baseURL = 'http://192.168.246.58:8000/vendor';
   static const String url = 'http://192.168.246.58:8000';
+
   // static const Color cardColor = Color(0xFFB9B9B9);
   static const Color cardColor = Color.fromARGB(255, 217, 216, 216);
   static const Color errorColor = Color(0xFFB00020);

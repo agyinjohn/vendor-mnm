@@ -53,6 +53,7 @@ class Authentication {
     } on TimeoutException catch (_) {
       return 'The connection has timed out, please try again';
     } catch (error) {
+      print(error);
       return 'Something went wrong please try again later';
     }
   }

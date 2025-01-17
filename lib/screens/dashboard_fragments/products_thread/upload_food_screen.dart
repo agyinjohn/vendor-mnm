@@ -15,19 +15,18 @@ import 'package:mnm_vendor/widgets/showsnackbar.dart';
 import 'package:nuts_activity_indicator/nuts_activity_indicator.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../app_colors.dart';
-import '../utils/providers/categories_state_provider.dart';
-import '../widgets/custom_button.dart';
+import '../../../app_colors.dart';
+import '../../../utils/providers/categories_state_provider.dart';
+import '../../../widgets/custom_button.dart';
 
-class UploadProductScreen extends ConsumerStatefulWidget {
-  const UploadProductScreen({super.key, this.selectedImages});
+class UploadFoodScreen extends ConsumerStatefulWidget {
+  const UploadFoodScreen({super.key, this.selectedImages});
   final List<AssetEntity>? selectedImages;
   @override
-  ConsumerState<UploadProductScreen> createState() =>
-      _UploadProductScreenState();
+  ConsumerState<UploadFoodScreen> createState() => _UploadFoodScreenState();
 }
 
-class _UploadProductScreenState extends ConsumerState<UploadProductScreen> {
+class _UploadFoodScreenState extends ConsumerState<UploadFoodScreen> {
   List<String> imageList = [
     'assets/images/kelewele 1.png',
     'assets/images/kfc 2.png',
