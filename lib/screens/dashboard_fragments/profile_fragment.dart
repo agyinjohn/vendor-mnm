@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:mnm_vendor/payment/payment_methods.dart';
 import 'package:mnm_vendor/screens/dashboard_fragments/verification_page.dart';
 
 import 'package:iconly/iconly.dart';
 import 'package:nuts_activity_indicator/nuts_activity_indicator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../app_colors.dart';
 import '../../utils/providers/verification_provider_state.dart';
 import '../../utils/store_notifier.dart';
@@ -17,18 +19,50 @@ class ProfileFragment extends ConsumerStatefulWidget {
 }
 
 class _ProfileFragmentState extends ConsumerState<ProfileFragment> {
+  String userId = "";
+  String name = "";
+  String email = "";
+  String phoneNumber = "";
+  String role = "";
+  DateTime createdAt = DateTime.now();
+
   @override
   void initState() {
     super.initState();
+    _loadUserData();
     // Trigger the fetch function on widget load
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(vendorVerificationProvider.notifier).fetchVerificationStatus();
     });
   }
 
+  Future<void> _loadUserData() async {
+    // Retrieve token from SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token != null) {
+      try {
+        // Decode the JWT token
+        final jwt = JwtDecoder.decode(token);
+        setState(() {
+          userId = jwt['_id'];
+          name = jwt['name'];
+          email = jwt['email'];
+          phoneNumber = jwt['phoneNumber'];
+          role = jwt['role'];
+          createdAt = DateTime.parse(jwt['created_at']);
+        });
+      } catch (e) {
+        print('Error decoding token: $e');
+      }
+    }
+  }
+
   final bool isAccountSetupComplete = true;
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final verificationState = ref.watch(vendorVerificationProvider);
     final stores = ref.watch(storeProvider);
     final store = stores[0];
@@ -51,79 +85,105 @@ class _ProfileFragmentState extends ConsumerState<ProfileFragment> {
                 //     _buildStoreRating(4.5), // Pass the store rating
                 //   ],
                 // ),
-                SizedBox(height: size.height * 0.025),
+                SizedBox(height: size.height * 0.015),
 
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.cardColor,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  width: double.infinity,
-                  height: size.height * 0.18,
-                  child: Padding(
-                    padding: EdgeInsets.all(size.width * 0.03),
+                Center(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // const Text('Accounts Registered: 2'),
-                        SizedBox(height: size.height * 0.01),
-                        Row(
-                          children: [
-                            //  Profile Picture
-                            Center(
-                              child: CircleAvatar(
-                                radius: 25,
-                                // backgroundColor: Colors.transparent,
-                                backgroundImage: const AssetImage(
-                                  'assets/images/main-logo.jpg',
-                                ),
-                                onBackgroundImageError:
-                                    (exception, stackTrace) {
-                                  // Handle image loading error
-                                },
-                              ),
-                            ),
-                            SizedBox(width: size.width * 0.03),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  store.storeName,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13),
-                                ),
-                                Text(
-                                  store.storePhone,
-                                  style: const TextStyle(fontSize: 11),
-                                ),
-                                Text(
-                                  store.type.name,
-                                  style: const TextStyle(fontSize: 11),
-                                ),
-                              ],
-                            ),
-                            const Spacer(),
-
-                            Container(
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(6)),
-                              height: size.height * 0.05,
-                              width: size.height * 0.05,
-                              child: Center(
-                                child: Image.asset('assets/images/transfer.png',
-                                    fit: BoxFit.cover),
-                              ),
-                            )
-                          ],
-                        )
-                      ],
+                  children: [
+                    CircleAvatar(
+                      radius: size.width * 0.15,
+                      backgroundImage:
+                          const AssetImage('assets/images/profile-pic.png'),
                     ),
-                  ),
+                    Text(
+                      name,
+                      style: theme.textTheme.titleSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      phoneNumber,
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                    Text(
+                      email,
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                  ],
+                )),
+
+                // Container(
+                //   decoration: BoxDecoration(
+                //     color: AppColors.cardColor,
+                //     borderRadius: BorderRadius.circular(12),
+                //   ),
+                //   width: double.infinity,
+                //   height: size.height * 0.18,
+                //   child: Padding(
+                //     padding: EdgeInsets.all(size.width * 0.03),
+                //     child: Column(
+                //       crossAxisAlignment: CrossAxisAlignment.start,
+                //       children: [
+                //         // const Text('Accounts Registered: 2'),
+                //         SizedBox(height: size.height * 0.01),
+                //         Row(
+                //           children: [
+                //             //  Profile Picture
+                //             Center(
+                //               child: CircleAvatar(
+                //                 radius: 25,
+                //                 // backgroundColor: Colors.transparent,
+                //                 backgroundImage: const AssetImage(
+                //                   'assets/images/main-logo.jpg',
+                //                 ),
+                //                 onBackgroundImageError:
+                //                     (exception, stackTrace) {
+                //                   // Handle image loading error
+                //                 },
+                //               ),
+                //             ),
+                //             SizedBox(width: size.width * 0.03),
+                //             Column(
+                //               crossAxisAlignment: CrossAxisAlignment.start,
+                //               children: [
+                //                 Text(
+                //                   store.storeName,
+                //                   style: const TextStyle(
+                //                       fontWeight: FontWeight.bold,
+                //                       fontSize: 13),
+                //                 ),
+                //                 Text(
+                //                   store.storePhone,
+                //                   style: const TextStyle(fontSize: 11),
+                //                 ),
+                //                 Text(
+                //                   store.type.name,
+                //                   style: const TextStyle(fontSize: 11),
+                //                 ),
+                //               ],
+                //             ),
+                //             const Spacer(),
+
+                //             Container(
+                //               decoration: BoxDecoration(
+                //                   color: Colors.white,
+                //                   borderRadius: BorderRadius.circular(6)),
+                //               height: size.height * 0.05,
+                //               width: size.height * 0.05,
+                //               child: Center(
+                //                 child: Image.asset('assets/images/transfer.png',
+                //                     fit: BoxFit.cover),
+                //               ),
+                //             )
+                //           ],
+                //         )
+                //       ],
+                //     ),
+                //   ),
+                // ),
+                SizedBox(height: size.height * 0.025),
+                const Text(
+                  'Account Information',
                 ),
-                SizedBox(height: size.height * 0.035),
-                const Text('Account Information'),
                 SizedBox(height: size.height * 0.025),
                 Row(
                   children: [

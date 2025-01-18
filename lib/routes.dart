@@ -7,6 +7,7 @@ import 'package:mnm_vendor/payment/payment_methods.dart';
 import 'package:mnm_vendor/screens/add_store_page.dart';
 import 'package:mnm_vendor/screens/bussiness_info.dart';
 import 'package:mnm_vendor/screens/customized_ui_image_picker.dart';
+import 'package:mnm_vendor/screens/dashboard_fragments/redrawal_request_page.dart';
 import 'package:mnm_vendor/screens/dashboard_fragments/verification_page.dart';
 import 'package:mnm_vendor/screens/dashboard_page.dart';
 import 'package:mnm_vendor/screens/face_id_page.dart';
@@ -103,6 +104,10 @@ Route<dynamic> onGenerateRoute(RouteSettings setting, WidgetRef ref) {
     case AddbankCard.routeName:
       return PageTransition(
           child: const AddbankCard(), type: PageTransitionType.rightToLeft);
+    case RequestWithdrawalPage.routeName:
+      return PageTransition(
+          child: const RequestWithdrawalPage(),
+          type: PageTransitionType.rightToLeft);
     default:
       return MaterialPageRoute(
           builder: (_) => const Center(

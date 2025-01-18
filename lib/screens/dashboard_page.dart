@@ -10,8 +10,10 @@ import 'package:mnm_vendor/notification_page.dart';
 import 'package:mnm_vendor/screens/add_store_page.dart';
 import 'package:mnm_vendor/screens/dashboard_fragments/verification_page.dart';
 import 'package:mnm_vendor/screens/dashboard_loading_page.dart';
+import 'package:mnm_vendor/screens/earnings.dart';
 import 'package:mnm_vendor/screens/no_stores.dart';
 import 'package:mnm_vendor/screens/store_selection_page.dart';
+import 'package:mnm_vendor/widgets/error_alert_dialogue.dart';
 import 'package:mnm_vendor/widgets/showsnackbar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/selected_store_notifier.dart';
@@ -95,15 +97,22 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       // });
     } on ClientException catch (e) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => const NoStores()));
+        showErrorDialog(context, () {
+          getUserStore();
+        });
       });
-      showCustomSnackbar(context: context, message: e.toString());
+
+      // showCustomSnackbar(context: context, message: e.toString());
     } catch (e) {
       // WidgetsBinding.instance.addPostFrameCallback((_) {
       //   Navigator.pushReplacementNamed(context, '/no-stores');
       // });
-      showCustomSnackbar(context: context, message: e.toString());
+      // showCustomSnackbar(context: context, message: e.toString());
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showErrorDialog(context, () {
+          getUserStore();
+        });
+      });
     }
   }
 
@@ -246,7 +255,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 if (value == 1) {
                   Navigator.pushNamed(context, StoreDetailsPage.routeName);
                 } else if (value == 2) {
-                  Navigator.pushNamed(context, AddStorePage.routeName);
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const Earnings()));
                 }
               },
               itemBuilder: (context) {

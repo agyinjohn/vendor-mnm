@@ -164,18 +164,18 @@ class _SignInPageState extends ConsumerState<SignInScreen> {
                       ),
                       const SizedBox(height: 16),
                       CustomButton(
-                          onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      const UploadFoodScreen())),
-                          // onTap: () async {
-                          //   final isloginSuccess = await authNotifier.login(
-                          //       _controllerID.text.trim(),
-                          //       _controllerPassword.text.trim(),
-                          //       context,
-                          //       ref);
-                          // },
+                          // onTap: () => Navigator.push(
+                          //     context,
+                          //     MaterialPageRoute(
+                          //         builder: (context) =>
+                          //             const UploadFoodScreen())),
+                          onTap: () async {
+                            final isloginSuccess = await authNotifier.login(
+                                _controllerID.text.trim(),
+                                _controllerPassword.text.trim(),
+                                context,
+                                ref);
+                          },
                           title: 'Login'),
                       const SizedBox(height: 24),
                       const Text(

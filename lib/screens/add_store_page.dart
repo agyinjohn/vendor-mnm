@@ -296,6 +296,7 @@ class AddStorePageState extends ConsumerState<AddStorePage> {
                           });
                           print(isLoading);
                           await StoreService.addStore(
+                              onComplete: () {},
                               contxt: context,
                               startTime: '',
                               endTime: '',

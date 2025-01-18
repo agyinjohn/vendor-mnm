@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mnm_vendor/app_colors.dart';
 import 'package:mnm_vendor/widgets/showsnackbar.dart';
 
+import '../screens/dashboard_fragments/verification_page.dart';
+
 // Define the provider for the API response
 final storeResponseProvider = StateProvider<String?>((ref) => null);
 
@@ -22,6 +24,7 @@ class StoreService {
     required WidgetRef ref,
     required List<Map<String, String>> images,
     required BuildContext contxt,
+    required VoidCallback onComplete,
   }) async {
     // API endpoint for adding the store
     const String apiUrl = '${AppColors.url}/vendor/add-store-info';
@@ -49,11 +52,14 @@ class StoreService {
         },
         body: jsonEncode(storeData),
       );
+      print(response.statusCode);
       print(response.body);
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         // Success: Update the response provider
-        ref.read(storeResponseProvider.notifier).state =
-            'Store successfully added';
+        onComplete();
+        showCustomSnackbar(
+            context: contxt, message: 'store successfully added');
+        Navigator.pushReplacementNamed(contxt, KycVerificationScreen.routeName);
       } else {
         throw Exception(jsonDecode(response.body)['message']);
       }

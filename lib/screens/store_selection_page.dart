@@ -137,7 +137,7 @@ class StoreDetailsPage extends ConsumerWidget {
                       height: 250,
                       width: double.infinity,
                       child: Image.network(
-                        '${AppColors.url}/${selectedStore.images[0]['url']}',
+                        '${AppColors.url}${selectedStore.images[0]['url']}',
                         fit: BoxFit.cover,
                       ),
                     ),

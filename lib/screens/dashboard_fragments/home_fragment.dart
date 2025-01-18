@@ -12,6 +12,7 @@ import 'package:nuts_activity_indicator/nuts_activity_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../app_colors.dart';
 import '../../services/order_services.dart';
+import '../../widgets/error_alert_dialogue.dart';
 import '../../widgets/order_item.dart';
 
 class HomeFragment extends ConsumerStatefulWidget {
@@ -34,6 +35,7 @@ class _HomeFragmentState extends ConsumerState<HomeFragment> {
     await ref.read(recentOrdersProvider.notifier).fetchRecentOrders();
   }
 
+  bool _isDialogOpen = false;
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -304,11 +306,28 @@ class _HomeFragmentState extends ConsumerState<HomeFragment> {
                                   createdAt: recentOrders[index]['createdAt']);
                             });
                       },
-                      error: (onb, stacktrace) => const Center(
-                            child: SizedBox(
-                              height: 100,
-                            ),
-                          ),
+                      error: (onb, stacktrace) {
+                        if (!_isDialogOpen) {
+                          _isDialogOpen =
+                              true; // Set flag to true when dialog is opened
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (context.mounted) {
+                              showErrorDialog(context, () async {
+                                if (context.mounted) {
+                                  await ref
+                                      .read(recentOrdersProvider.notifier)
+                                      .fetchRecentOrders();
+                                }
+                              }).then((_) {
+                                // Reset flag when dialog is closed
+                                _isDialogOpen = false;
+                              });
+                            }
+                          });
+                        }
+                        return const SizedBox
+                            .shrink(); // Avoid returning `null`
+                      },
                       loading: () => const Center(
                             child: NutsActivityIndicator(),
                           )),

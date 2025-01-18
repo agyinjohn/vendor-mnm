@@ -664,13 +664,9 @@ class _BussinessInfoState extends ConsumerState<BussinessInfo> {
                               // -1.6797468136824893,
                               storePhone: _storePhoneController.text,
                               type: _selectedCategory!.id,
+                              onComplete: widget.onComplete,
                               ref: ref);
                           // widget.onComplete();
-                          // showCustomSnackbar(
-                          //     context: context,
-                          //     message: 'store successfully added');
-                          // Navigator.pushReplacementNamed(
-                          //     context, KycVerificationScreen.routeName);
                         } catch (e) {
                           showCustomSnackbar(
                               context: context, message: e.toString());
