@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iconly/iconly.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:mnm_vendor/app_colors.dart';
+import 'package:mnm_vendor/widgets/showsnackbar.dart';
+import 'package:nuts_activity_indicator/nuts_activity_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/providers/add_and_fetch_payments_methods.dart';
 import '../widgets/custom_button.dart';
@@ -66,7 +68,7 @@ class _AddMomoAccountPageState extends ConsumerState<AddMomoAccountPage> {
   final TextEditingController _mobileNumberController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   String? _selectedCode;
-
+  bool isLoading = false;
   // Future<void> _loadEmailFromToken() async {
   //   try {
   //     final prefs = await SharedPreferences.getInstance();
@@ -114,105 +116,131 @@ class _AddMomoAccountPageState extends ConsumerState<AddMomoAccountPage> {
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(size.width * 0.03),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: size.height * 0.03),
-              Text('Add Mobile Money Wallet', style: theme.titleMedium),
-              SizedBox(height: size.height * 0.004),
-              Text('Add a mobile account to receive payments',
-                  style: theme.bodyMedium),
-              SizedBox(height: size.height * 0.024),
-              Text('Mobile money number', style: theme.bodyLarge),
-              SizedBox(height: size.height * 0.01),
-              TextFormField(
-                controller: _mobileNumberController,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.grey[300],
-                  hintText: 'E.g. 024 242 4242',
-                  hintStyle: theme.bodyMedium,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(6.0),
-                    borderSide: BorderSide.none,
+        child: Stack(children: [
+          Padding(
+            padding: EdgeInsets.all(size.width * 0.03),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: size.height * 0.03),
+                Text('Add Mobile Money Wallet', style: theme.titleMedium),
+                SizedBox(height: size.height * 0.004),
+                Text('Add a mobile account to receive payments',
+                    style: theme.bodyMedium),
+                SizedBox(height: size.height * 0.024),
+                Text('Mobile money number', style: theme.bodyLarge),
+                SizedBox(height: size.height * 0.01),
+                TextFormField(
+                  controller: _mobileNumberController,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.grey[300],
+                    hintText: 'E.g. 024 242 4242',
+                    hintStyle: theme.bodyMedium,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(6.0),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  keyboardType: TextInputType.phone,
+                ),
+                SizedBox(height: size.height * 0.024),
+                Text('Registered Name', style: theme.bodyLarge),
+                TextFormField(
+                  controller: _nameController,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.grey[300],
+                    hintText: 'John Doe',
+                    hintStyle: theme.bodyMedium,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(6.0),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                ),
+                SizedBox(height: size.height * 0.024),
+                Text('Select network', style: theme.bodyLarge),
+                SizedBox(height: size.height * 0.01),
+                DropdownButtonFormField<String>(
+                  value: _selectedCode,
+                  items: paymentChannels.map((channel) {
+                    return DropdownMenuItem<String>(
+                      value: channel.code,
+                      child: Text(channel.name),
+                    );
+                  }).toList(),
+                  onChanged: (newValue) {
+                    setState(() {
+                      _selectedCode = newValue;
+                    });
+                  },
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.grey[300],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
                   ),
                 ),
-                keyboardType: TextInputType.phone,
-              ),
-              SizedBox(height: size.height * 0.024),
-              Text('Registered Name', style: theme.bodyLarge),
-              TextFormField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.grey[300],
-                  hintText: 'John Doe',
-                  hintStyle: theme.bodyMedium,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(6.0),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-                keyboardType: TextInputType.emailAddress,
-              ),
-              SizedBox(height: size.height * 0.024),
-              Text('Select network', style: theme.bodyLarge),
-              SizedBox(height: size.height * 0.01),
-              DropdownButtonFormField<String>(
-                value: _selectedCode,
-                items: paymentChannels.map((channel) {
-                  return DropdownMenuItem<String>(
-                    value: channel.code,
-                    child: Text(channel.name),
-                  );
-                }).toList(),
-                onChanged: (newValue) {
-                  setState(() {
-                    _selectedCode = newValue;
-                  });
-                },
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.grey[300],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
-              ),
-              SizedBox(height: size.height * 0.25),
-              CustomButton(
-                onTap: () async {
-                  if (_selectedCode != null &&
-                      _mobileNumberController.text.isNotEmpty) {
-                    print(_selectedCode);
-                    await ref.read(paymentProvider.notifier).addPaymentMethod(
-                          name: _nameController.text,
-                          paymentType: 'mobile_money',
-                          accountNumber: _mobileNumberController.text,
-                          bankCode: _selectedCode!,
+                SizedBox(height: size.height * 0.25),
+                CustomButton(
+                  onTap: () async {
+                    if (_selectedCode != null &&
+                        _mobileNumberController.text.isNotEmpty) {
+                      try {
+                        setState(() {
+                          isLoading = true;
+                        });
+                        print(_selectedCode);
+                        await ref
+                            .read(paymentProvider.notifier)
+                            .addPaymentMethod(
+                              name: _nameController.text,
+                              paymentType: 'mobile_money',
+                              accountNumber: _mobileNumberController.text,
+                              bankCode: _selectedCode!,
+                              ctx: context,
+                            );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Account successfully added!'),
+                          ),
                         );
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Account successfully added!'),
-                      ),
-                    );
-                    Navigator.of(context).pop();
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Please complete all fields'),
-                      ),
-                    );
-                  }
-                },
-                title: 'Save this wallet',
-              ),
-              SizedBox(height: size.height * 0.03),
-            ],
+                        Navigator.of(context).pop();
+                        setState(() {
+                          isLoading = false;
+                        });
+                      } finally {
+                        setState(() {
+                          isLoading = false;
+                        });
+                      }
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Please complete all fields'),
+                        ),
+                      );
+                    }
+                  },
+                  title: 'Save this wallet',
+                ),
+                SizedBox(height: size.height * 0.03),
+              ],
+            ),
           ),
-        ),
+          if (isLoading)
+            Container(
+              width: double.infinity,
+              height: size.height * 0.85,
+              color: Colors.white54,
+              child: const Center(
+                child: NutsActivityIndicator(),
+              ),
+            )
+        ]),
       ),
     );
   }

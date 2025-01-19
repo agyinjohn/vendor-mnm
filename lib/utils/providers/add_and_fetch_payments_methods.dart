@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
+import 'package:mnm_vendor/widgets/showsnackbar.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -30,6 +32,7 @@ class PaymentNotifier extends StateNotifier<List<dynamic>> {
     required String paymentType,
     required String accountNumber,
     required String bankCode,
+    required BuildContext ctx,
   }) async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     final token = pref.get('token');
@@ -49,10 +52,13 @@ class PaymentNotifier extends StateNotifier<List<dynamic>> {
 
     if (response.statusCode == 200) {
       // await fetchPaymentMethods(''); // Refresh payment methods after adding
-      print(jsonDecode(response.body));
+      showCustomSnackbar(
+          context: ctx, message: jsonDecode(response.body)['message']);
     } else {
-      print(jsonDecode(response.body));
+      // print(jsonDecode(response.body));
       print(response.body);
+      showCustomSnackbar(
+          context: ctx, message: jsonDecode(response.body)['message']);
       throw Exception('Failed to add payment method');
     }
   }

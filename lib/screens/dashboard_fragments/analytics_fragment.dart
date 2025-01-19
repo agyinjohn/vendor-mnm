@@ -1,15 +1,67 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mnm_vendor/utils/providers/analytics_provider.dart';
+import 'package:nuts_activity_indicator/nuts_activity_indicator.dart';
 import '../../app_colors.dart';
+import '../../widgets/error_alert_dialogue.dart';
 
-class AnalyticsFragment extends StatelessWidget {
+class AnalyticsFragment extends ConsumerStatefulWidget {
   const AnalyticsFragment({super.key});
 
+  @override
+  ConsumerState<AnalyticsFragment> createState() => _AnalyticsFragmentState();
+}
+
+class _AnalyticsFragmentState extends ConsumerState<AnalyticsFragment> {
+  @override
+  void initState() {
+    super.initState();
+    getAnalyticsData();
+  }
+
+  void getAnalyticsData() async {
+    await ref.read(statisticsNotifierProvider.notifier).fetchStatistics('week');
+  }
+
+  String _getRatingLabel(double rating) {
+    if (rating >= 4.8) {
+      return 'Excellent';
+    } else if (rating >= 4.0) {
+      return 'Very Good';
+    } else if (rating >= 3.0) {
+      return 'Good';
+    } else if (rating >= 2.0) {
+      return 'Fair';
+    } else if (rating >= 1.0) {
+      return 'Poor';
+    } else {
+      return 'Very Poor';
+    }
+  }
+
+  Color _getRatingColor(double rating) {
+    if (rating >= 4.8) {
+      return Colors.green; // Excellent
+    } else if (rating >= 4.0) {
+      return Colors.lightGreen; // Very Good
+    } else if (rating >= 3.0) {
+      return Colors.amber; // Good
+    } else if (rating >= 2.0) {
+      return Colors.orange; // Fair
+    } else if (rating >= 1.0) {
+      return Colors.redAccent; // Poor
+    } else {
+      return Colors.red; // Very Poor
+    }
+  }
+
+  bool _isDialogOpen = false;
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final theme = Theme.of(context).textTheme; // Access the TextTheme
-
+    final statisticsProvider = ref.watch(statisticsNotifierProvider);
     return Scaffold(
       body: SingleChildScrollView(
         padding: EdgeInsets.all(size.width * 0.018),
@@ -17,56 +69,95 @@ class AnalyticsFragment extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: size.height * 0.03),
-            Text(
-              'General Overview',
-              style: theme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            statisticsProvider.when(
+              data: (data) {
+                print(data);
+                return Column(
+                  children: [
+                    Text(
+                      'General Overview',
+                      style: theme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: size.height * 0.025),
+                    _buildCustomerOverview(context, data['newUsersThisWeek'],
+                        data['returningUsersThisWeek']),
+                    SizedBox(height: size.height * 0.01),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child:
+                              _buildOrdersReview(context, data['totalSales']),
+                        ),
+                        SizedBox(width: size.width * 0.01),
+                        Expanded(
+                          flex: 1,
+                          child: _buildRating(context, data['ratings']),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: size.height * 0.04),
+                    Text(
+                      'Promotion Performance',
+                      style: theme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: size.height * 0.015),
+                    _buildPromotionPerformance(context),
+                    SizedBox(height: size.height * 0.04),
+                    Text(
+                      'Sales Overview',
+                      style: theme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: size.height * 0.015),
+                    _buildSalesOverview(context),
+                    SizedBox(height: size.height * 0.02),
+                    _buildSalesChart(context),
+                    SizedBox(height: size.height * 0.04),
+                    Text(
+                      'Best Selling Products',
+                      style: theme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: size.height * 0.015),
+                    _buildBestSellingProducts(context),
+                  ],
+                );
+              },
+              error: (error, stackTrace) {
+                if (!_isDialogOpen) {
+                  _isDialogOpen =
+                      true; // Set flag to true when dialog is opened
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (context.mounted) {
+                      showErrorDialog(context, () async {
+                        if (context.mounted) {
+                          await ref
+                              .read(statisticsNotifierProvider.notifier)
+                              .fetchStatistics("week");
+                        }
+                      }, 'Something went wrong while trying to fetch shop details, try again!')
+                          .then((_) {
+                        // Reset flag when dialog is closed
+                        _isDialogOpen = false;
+                      });
+                    }
+                  });
+                }
+                return const SizedBox.shrink();
+              },
+              loading: () => const NutsActivityIndicator(),
             ),
-            SizedBox(height: size.height * 0.025),
-            _buildCustomerOverview(context),
-            SizedBox(height: size.height * 0.01),
-            Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: _buildOrdersReview(context),
-                ),
-                SizedBox(width: size.width * 0.01),
-                Expanded(
-                  flex: 1,
-                  child: _buildRating(context),
-                ),
-              ],
-            ),
-            SizedBox(height: size.height * 0.04),
-            Text(
-              'Promotion Performance',
-              style: theme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: size.height * 0.015),
-            _buildPromotionPerformance(context),
-            SizedBox(height: size.height * 0.04),
-            Text(
-              'Sales Overview',
-              style: theme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: size.height * 0.015),
-            _buildSalesOverview(context),
-            SizedBox(height: size.height * 0.02),
-            _buildSalesChart(context),
-            SizedBox(height: size.height * 0.04),
-            Text(
-              'Best Selling Products',
-              style: theme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: size.height * 0.015),
-            _buildBestSellingProducts(context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildCustomerOverview(BuildContext context) {
+  Widget _buildCustomerOverview(
+      BuildContext context, int newCustomer, int returnCustomer) {
     final size = MediaQuery.of(context).size;
     final theme = Theme.of(context).textTheme;
 
@@ -115,7 +206,7 @@ class AnalyticsFragment extends StatelessWidget {
                             Row(
                               children: [
                                 Text(
-                                  '70',
+                                  newCustomer.toString(),
                                   style: theme.headlineSmall
                                       ?.copyWith(fontWeight: FontWeight.bold),
                                 ),
@@ -146,7 +237,7 @@ class AnalyticsFragment extends StatelessWidget {
                             Row(
                               children: [
                                 Text(
-                                  '30',
+                                  returnCustomer.toString(),
                                   style: theme.headlineSmall
                                       ?.copyWith(fontWeight: FontWeight.bold),
                                 ),
@@ -176,7 +267,7 @@ class AnalyticsFragment extends StatelessWidget {
     );
   }
 
-  Widget _buildOrdersReview(BuildContext context) {
+  Widget _buildOrdersReview(BuildContext context, int totalOrders) {
     final size = MediaQuery.of(context).size;
     final theme = Theme.of(context).textTheme;
 
@@ -221,7 +312,7 @@ class AnalyticsFragment extends StatelessWidget {
                       ),
                       SizedBox(width: size.width * 0.01),
                       Text(
-                        '200',
+                        totalOrders.toString(),
                         style: theme.headlineSmall
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
@@ -246,7 +337,7 @@ class AnalyticsFragment extends StatelessWidget {
     );
   }
 
-  Widget _buildRating(BuildContext context) {
+  Widget _buildRating(BuildContext context, double totalRating) {
     final size = MediaQuery.of(context).size;
     final theme = Theme.of(context).textTheme;
 
@@ -288,7 +379,7 @@ class AnalyticsFragment extends StatelessWidget {
                     child: Row(
                       children: [
                         Text(
-                          '4.5',
+                          _getRatingLabel(totalRating),
                           style: theme.headlineSmall
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),

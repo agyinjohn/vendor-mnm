@@ -96,22 +96,20 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       //   isLoading = false;
       // });
     } on ClientException catch (e) {
+      print("Client exception $e");
       WidgetsBinding.instance.addPostFrameCallback((_) {
         showErrorDialog(context, () {
           getUserStore();
-        });
+        }, 'Failed to load shop details, connection error!');
       });
 
       // showCustomSnackbar(context: context, message: e.toString());
     } catch (e) {
-      // WidgetsBinding.instance.addPostFrameCallback((_) {
-      //   Navigator.pushReplacementNamed(context, '/no-stores');
-      // });
-      // showCustomSnackbar(context: context, message: e.toString());
+      print('error $e');
       WidgetsBinding.instance.addPostFrameCallback((_) {
         showErrorDialog(context, () {
           getUserStore();
-        });
+        }, 'Something went wrong while trying to fetch shop details, try again!');
       });
     }
   }

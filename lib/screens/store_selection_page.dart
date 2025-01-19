@@ -2,18 +2,31 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mnm_vendor/app_colors.dart';
 import 'package:mnm_vendor/providers/toggle_shop_status.dart';
+import 'package:mnm_vendor/screens/dashboard_fragments/verification_page.dart';
 import 'package:mnm_vendor/screens/preview_image_screen.dart';
 import 'package:mnm_vendor/utils/selected_store_notifier.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:mnm_vendor/widgets/showsnackbar.dart';
+import 'package:nuts_activity_indicator/nuts_activity_indicator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class StoreDetailsPage extends ConsumerWidget {
+import '../utils/store_notifier.dart';
+import '../widgets/error_alert_dialogue.dart';
+
+class StoreDetailsPage extends ConsumerStatefulWidget {
   const StoreDetailsPage({super.key});
   static const routeName = '/store-details-page';
 
+  @override
+  ConsumerState<StoreDetailsPage> createState() => _StoreDetailsPageState();
+}
+
+class _StoreDetailsPageState extends ConsumerState<StoreDetailsPage> {
   String _convertMinsToTime(int mins) {
     final hours = mins ~/ 60;
     final minutes = mins % 60;
@@ -105,8 +118,99 @@ class StoreDetailsPage extends ConsumerWidget {
     }
   }
 
+  late String usertoken;
+  bool isLoading = false;
+  getUserStore() async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+      SharedPreferences pref = await SharedPreferences.getInstance();
+
+      final token = pref.getString('token');
+      setState(() {
+        usertoken = token!;
+      });
+      print("Store token");
+      print(token);
+      await ref
+          .read(storeProvider.notifier)
+          .fetchStores(token!, context)
+          .then((_) {
+        final stores = ref.read(storeProvider);
+        print(stores);
+        if (stores.isNotEmpty) {
+          setState(() {
+            isLoading = false;
+          });
+          // Load selected store or select the first one
+          ref
+              .read(selectedStoreProvider.notifier)
+              .loadSelectedStore(stores)
+              .then((_) {
+            print(stores);
+          });
+        } else {
+          showCustomSnackbar(
+              context: context,
+              message: 'Your Account is not complete',
+              duration: const Duration(milliseconds: 20),
+              action: SnackBarAction(
+                  label: "Continue",
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                const KycVerificationScreen()));
+                  }));
+          // Handle no stores available
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const KycVerificationScreen()));
+          });
+        }
+      });
+      // setState(() {
+      //   isLoading = false;
+      // });
+    } on ClientException catch (e) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showErrorDialog(context, () {
+          getUserStore();
+        }, 'Something went wrong while trying to fetch shop details, try again!');
+      });
+
+      // showCustomSnackbar(context: context, message: e.toString());
+    } catch (e) {
+      // WidgetsBinding.instance.addPostFrameCallback((_) {
+      //   Navigator.pushReplacementNamed(context, '/no-stores');
+      // });
+      // showCustomSnackbar(context: context, message: e.toString());
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showErrorDialog(context, () {
+          getUserStore();
+        }, 'Something went wrong while trying to fetch shop details, try again!');
+      });
+    }
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+    getShopStatus();
+  }
+
+  getShopStatus() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    final storeId = pref.getString('selectedStoreId');
+    await ref.read(storeStatusProvider.notifier).fetchStoreStatus(storeId!);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     // final theme = Theme.of(context).textTheme;
     final theme = Theme.of(context);
@@ -123,6 +227,9 @@ class StoreDetailsPage extends ConsumerWidget {
       );
     }
     final storeStatusAsync = ref.watch(storeStatusProvider);
+    // print(selectedStore.images.entries.first);
+    print(">>>>>>>>>>>>>>>>>>>>>>>>");
+    // print(selectedStore.images.entries.first.value['url']);
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -133,14 +240,14 @@ class StoreDetailsPage extends ConsumerWidget {
               if (selectedStore.images.isNotEmpty)
                 Stack(
                   children: [
-                    SizedBox(
-                      height: 250,
-                      width: double.infinity,
-                      child: Image.network(
-                        '${AppColors.url}${selectedStore.images[0]['url']}',
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+                    // SizedBox(
+                    //   height: 250,
+                    //   width: double.infinity,
+                    //   child: Image.network(
+                    //     '${selectedStore.images.entries.first.value['url']}',
+                    //     fit: BoxFit.cover,
+                    //   ),
+                    // ),
                     Positioned(
                       top: 35,
                       left: 20,
@@ -265,181 +372,64 @@ class StoreDetailsPage extends ConsumerWidget {
                           style: theme.textTheme.titleMedium,
                         ),
                         SizedBox(height: size.height * 0.01),
-                        // Container(
-                        //   decoration: BoxDecoration(
-                        //     borderRadius: BorderRadius.circular(6),
-                        //     color: AppColors.cardColor,
-                        //   ),
-                        //   width: size.width,
-                        //   child:
-
-                        //   Padding(
-                        //     padding: EdgeInsets.all(size.width * 0.02),
-                        //     child: Row(
-                        //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        //       children: [
-                        //         Column(
-                        //           crossAxisAlignment: CrossAxisAlignment.start,
-                        //           children: [
-                        //             Row(
-                        //               children: [
-                        //                 Icon(Icons.circle,
-                        //                     color: selectedStore.isOpened
-                        //                         ? Colors.green
-                        //                         : AppColors.errorColor2,
-                        //                     size: size.width * 0.03),
-                        //                 SizedBox(width: size.width * 0.014),
-                        //                 Text(
-                        //                   selectedStore.isOpened
-                        //                       ? 'Opened'
-                        //                       : 'Closed',
-                        //                   style: theme.textTheme.bodySmall,
-                        //                 ),
-                        //               ],
-                        //             ),
-                        //             Text(
-                        //               selectedStore.isOpened
-                        //                   ? 'You can receive orders'
-                        //                   : 'You can\'t receive orders',
-                        //               style: theme.textTheme.bodySmall,
-                        //             ),
-                        //           ],
-                        //         ),
-                        //         Switch(
-                        //           value: true,
-                        //           onChanged: (value) async {
-
-                        //           },
-                        //           activeColor: Colors.white,
-                        //           inactiveThumbColor: AppColors.errorColor2,
-                        //           inactiveTrackColor: Colors.black87,
-                        //           activeTrackColor: Colors.green,
-                        //         ),
-                        //       ],
-                        //     ),
-                        //   ),
-                        // ),
-
-                        storeStatusAsync.when(data: (selectedStoreStatus) {
-                          // Main content when data is available
-                          print(selectedStoreStatus);
-                          if (selectedStoreStatus == null) {
-                            return const Center(
-                                child: Text('No store data available.'));
-                          }
-                          final isOpen = selectedStoreStatus.status == 'OPEN';
-                          return Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(6),
-                              color: AppColors.cardColor,
-                            ),
-                            width: size.width,
-                            child: Padding(
-                              padding: EdgeInsets.all(size.width * 0.02),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.circle,
-                                            color: selectedStore.isOpened
-                                                ? Colors.green
-                                                : AppColors.errorColor2,
-                                            size: size.width * 0.03,
-                                          ),
-                                          SizedBox(width: size.width * 0.014),
-                                          Text(
-                                            isOpen ? 'Opened' : 'Closed',
-                                            style: theme.textTheme.bodySmall,
-                                          ),
-                                        ],
-                                      ),
-                                      Text(
-                                        isOpen
-                                            ? 'You can receive orders'
-                                            : 'You can\'t receive orders',
-                                        style: theme.textTheme.bodySmall,
-                                      ),
-                                    ],
-                                  ),
-                                  Switch(
-                                    value: isOpen,
-                                    onChanged: (value) async {
-                                      await ref
-                                          .read(storeStatusProvider.notifier)
-                                          .toggleStoreStatus(selectedStore.id,
-                                              value ? 'OPEN' : 'CLOSED');
-                                    },
-                                    activeColor: Colors.white,
-                                    inactiveThumbColor: AppColors.errorColor2,
-                                    inactiveTrackColor: Colors.black87,
-                                    activeTrackColor: Colors.green,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        }, loading: () {
-                          // Show a loading skeleton or spinner
-                          return Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(6),
-                              color: AppColors.cardColor,
-                            ),
-                            width: size.width,
-                            height:
-                                100, // Adjust height to match expected content
-                            child: const Center(
-                              child: CircularProgressIndicator(
-                                color: AppColors.primaryColor,
-                              ),
-                            ),
-                          );
-                        }, error: (error, stack) {
-                          // Show an error message with retry option
-                          return Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(6),
-                              color: AppColors.cardColor,
-                            ),
-                            width: size.width,
-                            height:
-                                100, // Adjust height to match expected content
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(Icons.error,
-                                      color: AppColors.errorColor2, size: 24),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'Failed to load store status',
-                                    style: theme.textTheme.bodySmall,
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      ref
-                                          .read(storeStatusProvider.notifier)
-                                          .fetchStoreStatus(selectedStore.id);
-                                    },
-                                    child: const Text(
-                                      'Retry',
-                                      style: TextStyle(
-                                          color: AppColors.primaryColor),
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(6),
+                            color: AppColors.cardColor,
+                          ),
+                          width: size.width,
+                          child: Padding(
+                            padding: EdgeInsets.all(size.width * 0.02),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.circle,
+                                          color: selectedStore.isOpened
+                                              ? Colors.green
+                                              : AppColors.errorColor2,
+                                          size: size.width * 0.03,
+                                        ),
+                                        SizedBox(width: size.width * 0.014),
+                                        Text(
+                                          selectedStore.isOpened
+                                              ? 'Opened'
+                                              : 'Closed',
+                                          style: theme.textTheme.bodySmall,
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                ],
-                              ),
+                                    Text(
+                                      selectedStore.isOpened
+                                          ? 'You can receive orders'
+                                          : 'You can\'t receive orders',
+                                      style: theme.textTheme.bodySmall,
+                                    ),
+                                  ],
+                                ),
+                                Switch(
+                                  value: selectedStore.isOpened,
+                                  onChanged: (value) async {
+                                    await ref
+                                        .read(storeStatusProvider.notifier)
+                                        .toggleStoreStatus(selectedStore.id,
+                                            value ? 'OPEN' : 'CLOSED');
+                                    getUserStore();
+                                  },
+                                  activeColor: Colors.white,
+                                  inactiveThumbColor: AppColors.errorColor2,
+                                  inactiveTrackColor: Colors.black87,
+                                  activeTrackColor: Colors.green,
+                                ),
+                              ],
                             ),
-                          );
-                        }),
-
+                          ),
+                        ),
                         const SizedBox(height: 10),
                         Text(
                           'Shop Location',
@@ -478,6 +468,7 @@ class StoreDetailsPage extends ConsumerWidget {
             left: 16,
             right: 16,
             child: Card(
+              color: AppColors.cardColor,
               elevation: 5,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(5),
@@ -504,6 +495,7 @@ class StoreDetailsPage extends ConsumerWidget {
                         const Icon(
                           Icons.location_on,
                           color: Colors.grey,
+                          size: 20,
                         ),
                         const SizedBox(
                           width: 10,
@@ -519,6 +511,7 @@ class StoreDetailsPage extends ConsumerWidget {
                         const Icon(
                           Icons.access_time_rounded,
                           color: Colors.grey,
+                          size: 20,
                         ),
                         const SizedBox(
                           width: 10,
@@ -535,6 +528,7 @@ class StoreDetailsPage extends ConsumerWidget {
                         const Icon(
                           Icons.phone,
                           color: Colors.grey,
+                          size: 20,
                         ),
                         const SizedBox(
                           width: 10,
@@ -556,6 +550,7 @@ class StoreDetailsPage extends ConsumerWidget {
                             const Icon(
                               Icons.star,
                               color: Colors.amber,
+                              size: 20,
                             ),
                             const SizedBox(
                               width: 10,
@@ -605,6 +600,13 @@ class StoreDetailsPage extends ConsumerWidget {
               ),
             ),
           ),
+          if (isLoading)
+            Container(
+              width: double.infinity,
+              height: double.infinity,
+              color: Colors.white.withOpacity(0.7),
+              child: const NutsActivityIndicator(),
+            )
         ],
       ),
     );

@@ -89,6 +89,7 @@ class Store {
   final Ratings ratings;
   final StoreType type; // StoreType object for the nested "type" field
   final DateTime createdAt;
+  // final Map<String, dynamic> images;
   final List<dynamic> images;
   final int startTime;
   final int endTime;

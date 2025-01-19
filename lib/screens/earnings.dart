@@ -260,28 +260,27 @@ class _EarningsState extends ConsumerState<Earnings> {
           if (!_isDialogShowing) {
             _isDialogShowing = true;
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              showErrorDialog(
-                context,
-                () async {
-                  // Close dialog before retry
-                  _isDialogShowing = false; // Reset the dialog flag
-                  try {
-                    await ref
-                        .read(earningsSummaryProvider.notifier)
-                        .fetchEarnings({
-                      'dateRange': 'week',
-                      'customStartDate': '',
-                      'customEndDate': '',
-                    });
-                  } catch (e) {
-                    // If retry fails, re-show the dialog
-                    if (!_isDialogShowing) {
-                      _isDialogShowing = true;
-                      showErrorDialog(context, () {});
-                    }
+              showErrorDialog(context, () async {
+                // Close dialog before retry
+                _isDialogShowing = false; // Reset the dialog flag
+                try {
+                  await ref
+                      .read(earningsSummaryProvider.notifier)
+                      .fetchEarnings({
+                    'dateRange': 'week',
+                    'customStartDate': '',
+                    'customEndDate': '',
+                  });
+                } catch (e) {
+                  // If retry fails, re-show the dialog
+                  if (!_isDialogShowing) {
+                    _isDialogShowing = true;
+                    showErrorDialog(context, () {},
+                        'Something went wrong while trying to fetching earning details, try again!');
                   }
-                },
-              ).then((_) {
+                }
+              }, 'Something went wrong while trying to fetch earnings,try again!')
+                  .then((_) {
                 // Reset the dialog flag when the dialog is dismissed
                 _isDialogShowing = false;
               });

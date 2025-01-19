@@ -45,7 +45,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(isLoading: true, error: null);
 
     final url = Uri.parse('${AppColors.baseUrl}/login');
-
+    print(url);
     try {
       final response = await http
           .post(
@@ -57,7 +57,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         }),
       )
           .timeout(
-        const Duration(seconds: 30),
+        const Duration(seconds: 100),
         onTimeout: () {
           throw TimeoutException(
               'The connection has timed out, please try again');

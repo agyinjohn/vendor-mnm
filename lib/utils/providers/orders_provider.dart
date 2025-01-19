@@ -59,6 +59,7 @@ class RecentOrdersNotifier extends StateNotifier<AsyncValue<StoreStatistics>> {
           .timeout(const Duration(seconds: 30));
       print(jsonDecode(response.body));
       print(response.statusCode);
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final storeStatistics = StoreStatistics.fromJson(data);

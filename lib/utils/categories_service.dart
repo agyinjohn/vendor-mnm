@@ -6,7 +6,7 @@ import 'package:mnm_vendor/models/categories_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CategoriesService {
-  static const String baseUrl = '${AppColors.url}/auth/item-categories';
+  static const String baseUrl = '${AppColors.baseURL}/categories';
 
   Future<List<dynamic>> fetchCategories() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
@@ -21,7 +21,7 @@ class CategoriesService {
         'Content-Type': 'application/json',
       },
     );
-    print(response);
+    print(response.body);
     if (response.statusCode == 200) {
       // List<dynamic> categories = jsonDecode(response.body);
       // // Extract the category names from the map

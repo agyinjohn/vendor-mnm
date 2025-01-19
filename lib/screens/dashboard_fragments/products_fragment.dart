@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mnm_vendor/screens/upload_product_screen.dart';
 import 'package:mnm_vendor/upload_pages/upload_beverage_screen.dart';
 import 'package:mnm_vendor/upload_pages/upload_drug_page.dart';
+import 'package:mnm_vendor/upload_pages/upload_food_screen.dart';
 import 'package:mnm_vendor/utils/fetch_stores.dart';
 import 'package:mnm_vendor/widgets/showsnackbar.dart';
 import 'package:nuts_activity_indicator/nuts_activity_indicator.dart';
@@ -10,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../app_colors.dart';
 import '../../models/food_item.dart';
 import '../../providers/store_item_provider.dart';
+import '../../upload_pages/upload_gift_screen.dart';
 import '../../utils/food_list.dart';
 import '../../utils/selected_store_notifier.dart';
 
@@ -101,7 +103,7 @@ class _ProductsFragmentState extends ConsumerState<ProductsFragment> {
   Widget build(BuildContext context) {
     final storeItems = ref.watch(storeItemsProvider);
     final size = MediaQuery.of(context).size;
-
+    final selectedStore = ref.watch(selectedStoreProvider);
     return Scaffold(
       body: Stack(
         children: [
@@ -170,12 +172,22 @@ class _ProductsFragmentState extends ConsumerState<ProductsFragment> {
       floatingActionButton: GestureDetector(
         onTap: () {
           Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    //  const UploadProductScreen()
-                    const UploadDrugScreen(),
-              ));
+            context,
+            MaterialPageRoute(
+              builder: (context) {
+                if (selectedStore!.type.name == 'fast food & beverages') {
+                  return const UploadFoodScreen();
+                } else if (selectedStore.type.name == 'gift packages') {
+                  return const UploadGiftScreen();
+                } else if (selectedStore.type.name == 'pharmacy') {
+                  return const UploadDrugScreen();
+                } else {
+                  // Fallback screen if none of the conditions match
+                  return const UploadBeverageScreen();
+                }
+              },
+            ),
+          );
         },
         child: Container(
           decoration: BoxDecoration(

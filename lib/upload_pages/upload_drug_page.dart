@@ -601,11 +601,10 @@ class _UploadDrugScreenState extends ConsumerState<UploadDrugScreen> {
               ),
               child: CustomButton(
                   onTap: () {
-                    // if (selectedStore.type.name ==
-                    //     'fast food & beverages') {
-                    //   handleItemUpload(context);
-                    //   print(priceList);
-                    // }
+                    if (selectedStore!.type.name == 'fast food & beverages') {
+                      handleItemUpload(context);
+                      print(priceList);
+                    }
                   },
                   title: 'Upload Product'),
             ),

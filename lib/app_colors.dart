@@ -20,6 +20,7 @@ class AppColors {
   // static const Color onPrimaryColor = Color(0xFFFFFFFF);
   // White  static const Color onSecondaryColor = Color(0xFF000000); // Black
   static const String baseUrl = 'http://192.168.43.58:8000/api';
+  // static const String baseUrl = 'https://09f3-129-122-40-97.ngrok-free.app/api';
   static const String baseURL = 'http://192.168.43.58:8000/vendor';
   static const String url = 'http://192.168.43.58:8000';
   // static const Color cardColor = Color(0xFFB9B9B9);

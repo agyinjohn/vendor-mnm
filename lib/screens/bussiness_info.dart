@@ -414,9 +414,7 @@ class _BussinessInfoState extends ConsumerState<BussinessInfo> {
                       children: [
                         const Text('Error loading business types'),
                         IconButton(
-                            onPressed: () {
-                              setState(() {});
-                            },
+                            onPressed: () async {},
                             icon: const Icon(Icons.replay_outlined))
                       ],
                     ),

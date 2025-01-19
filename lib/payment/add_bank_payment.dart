@@ -286,6 +286,7 @@ class _AddbankCardState extends ConsumerState<AddbankCard> {
                                 paymentType: 'bank',
                                 accountNumber: _accountController.text,
                                 bankCode: _selectedCode!,
+                                ctx: context,
                               );
                           showCustomSnackbar(
                               context: context,

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../app_colors.dart';
 
-Future<void> showErrorDialog(BuildContext context, VoidCallback onRetry) async {
+Future<void> showErrorDialog(
+    BuildContext context, VoidCallback onRetry, String message) async {
   await showDialog(
     barrierDismissible: false,
     context: context,
@@ -21,9 +22,9 @@ Future<void> showErrorDialog(BuildContext context, VoidCallback onRetry) async {
             ),
           ],
         ),
-        content: const Text(
-          'Something went wrong while fetching the order. Please try again.',
-          style: TextStyle(color: Colors.black87),
+        content: Text(
+          message,
+          style: const TextStyle(color: Colors.black87),
         ),
         actions: [
           ElevatedButton(
